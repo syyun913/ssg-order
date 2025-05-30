@@ -31,6 +31,5 @@ config:
     key-obtention-iterations: 1000
     string-output-type: base64
 
-# Logger? ??
 logging.level:
   org.hibernate.SQL: debug

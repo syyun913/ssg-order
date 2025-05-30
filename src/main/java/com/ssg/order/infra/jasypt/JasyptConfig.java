@@ -1,4 +1,4 @@
-package com.ssg.order.global.core.config;
+package com.ssg.order.infra.jasypt;
 
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 import org.jasypt.encryption.StringEncryptor;
