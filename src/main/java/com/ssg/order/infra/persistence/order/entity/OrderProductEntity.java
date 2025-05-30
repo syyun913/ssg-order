@@ -1,7 +1,7 @@
 package com.ssg.order.infra.persistence.order.entity;
 
+import com.ssg.order.domain.order.enumtype.OrderProductStatusCode;
 import com.ssg.order.infra.persistence.common.entity.BaseTimeEntity;
-import com.ssg.order.infra.persistence.order.converter.OrderProductStatusCodeConverter;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -24,8 +24,8 @@ public class OrderProductEntity extends BaseTimeEntity {
     private Long productId;
 
     @Column(name = "status_code")
-    @Convert(converter = OrderProductStatusCodeConverter.class)
-    private String statusCode;
+    @Enumerated(EnumType.STRING)
+    private OrderProductStatusCode statusCode;
 
     @Column(name = "quantity")
     private Integer quantity;
