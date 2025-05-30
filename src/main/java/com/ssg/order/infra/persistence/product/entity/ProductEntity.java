@@ -16,15 +16,15 @@ public class ProductEntity extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "product_name")
+    @Column(name = "product_name", nullable = false, columnDefinition = "VARCHAR(255)")
     private String productName;
 
-    @Column(name = "selling_price")
+    @Column(name = "selling_price", nullable = false)
     private Integer sellingPrice;
 
-    @Column(name = "discount_amount")
+    @Column(name = "discount_amount", nullable = false)
     private Integer discountAmount;
 
-    @Column(name = "stock")
+    @Column(name = "stock", nullable = false)
     private Integer stock;
 }

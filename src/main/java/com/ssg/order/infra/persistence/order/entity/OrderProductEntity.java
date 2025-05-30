@@ -17,25 +17,25 @@ public class OrderProductEntity extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "order_id")
+    @Column(name = "order_id", nullable = false, updatable = false)
     private Long orderId;
 
-    @Column(name = "product_id")
+    @Column(name = "product_id", nullable = false, updatable = false)
     private Long productId;
 
-    @Column(name = "status_code")
+    @Column(name = "status_code", nullable = false, columnDefinition = "varchar(30)")
     @Enumerated(EnumType.STRING)
     private OrderProductStatusCode statusCode;
 
-    @Column(name = "quantity")
+    @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
-    @Column(name = "payment_price")
+    @Column(name = "payment_price", nullable = false)
     private Integer paymentPrice;
 
-    @Column(name = "selling_price")
+    @Column(name = "selling_price", nullable = false)
     private Integer sellingPrice;
 
-    @Column(name = "discount_amount")
+    @Column(name = "discount_amount", nullable = false)
     private Integer discountAmount;
 }
