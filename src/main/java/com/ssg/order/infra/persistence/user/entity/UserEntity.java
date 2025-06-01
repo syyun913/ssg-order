@@ -2,12 +2,14 @@ package com.ssg.order.infra.persistence.user.entity;
 
 import com.ssg.order.infra.persistence.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.DynamicInsert;
 
 @Getter
 @Entity
+@Builder
+@AllArgsConstructor
+@DynamicInsert
 @Table(name = "USERS")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserEntity extends BaseTimeEntity {
@@ -16,8 +18,8 @@ public class UserEntity extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", columnDefinition = "varchar(50)")
-    private String name;
+    @Column(name = "user_name", unique = true, nullable = false, columnDefinition = "varchar(100)")
+    private String userName;
 
     @Column(name = "password", nullable = false, columnDefinition = "varchar(100)")
     private String password;

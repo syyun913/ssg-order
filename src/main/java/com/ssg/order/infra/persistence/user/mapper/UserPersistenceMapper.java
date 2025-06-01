@@ -12,7 +12,19 @@ public class UserPersistenceMapper {
         }
         return User.builder()
                 .id(userEntity.getId())
-                .name(userEntity.getName())
+                .userName(userEntity.getUserName())
+                .password(userEntity.getPassword())
+                .build();
+    }
+
+    public UserEntity toEntity(User user) {
+        if (user == null) {
+            return null;
+        }
+        return UserEntity.builder()
+                .id(user.getId())
+                .userName(user.getUserName())
+                .password(user.getPassword())
                 .build();
     }
 }
