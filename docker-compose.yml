@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: ssg-order-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - ssg-order-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ssg-order-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+    networks:
+      - ssg-order-network
+    volumes:
+      - ./logs:/app/logs
+
+volumes:
+  redis_data:
+
+networks:
+  ssg-order-network:
+    driver: bridge
