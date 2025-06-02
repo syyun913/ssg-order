@@ -1,9 +1,16 @@
 package com.ssg.order.api.global.core;
 
+import static com.ssg.order.domain.common.annotation.constants.CommonConstants.UNAUTHORIZED_MESSAGE;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssg.order.api.global.common.response.ExceptionResponse;
 import com.ssg.order.infra.jwt.JwtAuthenticationFilter;
+import java.io.PrintWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -11,6 +18,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -23,7 +31,6 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // TODO: 예외 핸들링 추가
         http
             .csrf(csrf -> csrf.disable())
             .headers(h -> h.frameOptions(f -> f.disable()))
@@ -36,8 +43,11 @@ public class SecurityConfig {
                 .defaultAuthenticationEntryPointFor((request, response, authException) -> {
                     if (request.getRequestURI().equals("/")) {
                         response.sendRedirect("/user/login-page");
+                    } else {
+                        authenticationEntryPoint().commence(request, response, authException);
                     }
-                }, request -> request.getRequestURI().equals("/")))
+                }, request -> true)
+            )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -51,5 +61,26 @@ public class SecurityConfig {
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return (request, response, authException) -> {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setCharacterEncoding("UTF-8");
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            PrintWriter out = response.getWriter();
+
+            out.write(objectMapper.writeValueAsString(
+                ExceptionResponse.builder()
+                    .status(HttpStatus.UNAUTHORIZED.value())
+                    .message(UNAUTHORIZED_MESSAGE)
+                    .build()));
+
+            out.flush();
+            out.close();
+        };
     }
 }
