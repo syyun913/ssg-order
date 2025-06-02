@@ -1,4 +1,4 @@
-package com.ssg.order.api.auth.service.response;
+package com.ssg.order.api.user.controller.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;

@@ -3,7 +3,7 @@ package com.ssg.order.api.global.core.config;
 import static com.ssg.order.domain.common.annotation.constants.CommonConstants.UNAUTHORIZED_MESSAGE;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ssg.order.api.auth.service.LogoutService;
+import com.ssg.order.api.user.service.LogoutService;
 import com.ssg.order.api.global.common.response.ExceptionResponse;
 import com.ssg.order.infra.jwt.JwtAuthenticationFilter;
 import java.io.PrintWriter;
