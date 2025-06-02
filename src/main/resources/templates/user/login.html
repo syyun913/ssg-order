@@ -87,15 +87,16 @@
                 }
             })
             .then(data => {
-                // JWT 토큰을 로컬 스토리지에 저장
-                localStorage.setItem('token', data.data);
+                // 액세스 토큰과 리프레시 토큰을 로컬 스토리지에 저장
+                localStorage.setItem('accessToken', data.data.accessToken);
+                localStorage.setItem('refreshToken', data.data.refreshToken);
                 alert(data.message);
                 
                 // /order/test API 호출
                 fetch('/order/test', {
                     method: 'GET',
                     headers: {
-                        'Authorization': 'Bearer ' + data.data
+                        'Authorization': 'Bearer ' + data.data.accessToken
                     }
                 })
                 .then(response => {
