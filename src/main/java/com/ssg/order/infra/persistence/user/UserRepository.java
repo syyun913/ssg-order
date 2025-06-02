@@ -1,5 +1,7 @@
 package com.ssg.order.infra.persistence.user;
 
+import com.ssg.order.domain.common.annotation.exception.BusinessException;
+import com.ssg.order.domain.common.annotation.exception.code.BusinessErrorCode;
 import com.ssg.order.domain.user.User;
 import com.ssg.order.domain.user.repository.UserReadRepository;
 import com.ssg.order.domain.user.repository.UserWriteRepository;
@@ -19,9 +21,10 @@ public class UserRepository implements UserReadRepository, UserWriteRepository {
     @Override
     public User findUserByUserName(String userName) {
         UserEntity userEntity = userJpaRepository.findByUserName(userName)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with username: " + userName));
+                .orElseThrow(() -> new BusinessException(
+                        BusinessErrorCode.NOT_FOUND_USER,
+                        "userName: " + userName));
 
-        // TODO: 공통 예외 적용
         return mapper.toDomain(userEntity);
     }
 
