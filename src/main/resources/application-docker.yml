@@ -1,0 +1,46 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password: ENC(fnKKrkrJ2TXc2u0ipRRQtgWDJLIvkiOI)
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        use_sql_comments: true
+
+  data:
+    redis:
+      host: redis # Docker Compose에서 redis 서비스명 사용
+      port: 6379
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
+jasypt:
+  encryptor:
+    bean: jasyptEncryptorBean
+
+config:
+  encrypt:
+    password: /AI3dYykcfg/N4fEFnNnbt8CJ5u0h/9l
+    algorithm: PBEWithMD5AndDES
+    provider-name: SunJCE
+    pool-size: 1
+    key-obtention-iterations: 1000
+    string-output-type: base64
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    com.ssg.order: debug
+  file:
+    name: /app/logs/application.log
