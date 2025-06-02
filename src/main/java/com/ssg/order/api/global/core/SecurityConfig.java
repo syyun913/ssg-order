@@ -26,12 +26,18 @@ public class SecurityConfig {
         // TODO: 예외 핸들링 추가
         http
             .csrf(csrf -> csrf.disable())
-            .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
+            .headers(h -> h.frameOptions(f -> f.disable()))
+            .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/user/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .requestMatchers("/user/**", "/swagger-ui/**", "/v3/api-docs/**", "/h2-console/**").permitAll()
                 .anyRequest().authenticated()
             )
+            .exceptionHandling(exception -> exception
+                .defaultAuthenticationEntryPointFor((request, response, authException) -> {
+                    if (request.getRequestURI().equals("/")) {
+                        response.sendRedirect("/user/login-page");
+                    }
+                }, request -> request.getRequestURI().equals("/")))
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
