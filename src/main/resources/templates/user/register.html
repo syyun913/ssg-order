@@ -57,7 +57,9 @@
                 if (response.ok) {
                     return response.json();
                 } else {
-                    throw new Error('회원가입에 실패했습니다.');
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.message || '회원가입에 실패했습니다.');
+                    });
                 }
             })
             .then(data => {
