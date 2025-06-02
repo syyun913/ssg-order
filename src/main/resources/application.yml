@@ -18,6 +18,7 @@ spring:
     redis:
       host: localhost
       port: 6379
+      password: ENC(JF7pv4H6nT9ddiqrebFR6ZkZAYYEFczH)
 
 jasypt:
   encryptor:
@@ -34,7 +35,8 @@ config:
 security:
   jwt:
     key: ENC(eHVnadN0LJAARoxY1hvGX0Qd/Jbu7xKfisb73v4GEzC/2PKouJUOoO95RsWE8THY)
-    expiration: 1800000 # 30 minutes
+    access-expiration-minutes: 30
+    refresh-expiration-days: 14
 
 logging.level:
   org.hibernate.SQL: debug

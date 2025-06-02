@@ -14,20 +14,19 @@ import java.util.Date;
 public class JwtUtil {
     @Value("${security.jwt.key}")
     private String secret;
-    @Value("${security.jwt.expiration}")
-    private long expirationMs;
+
 
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    public String generateToken(String id) {
+    public String generateToken(String name, long expirationMs) {
         return Jwts.builder()
-                .setSubject(id)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-                .compact();
+            .setSubject(name)
+            .setIssuedAt(new Date())
+            .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
+            .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+            .compact();
     }
 
     public String getIdFromToken(String token) {

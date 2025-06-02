@@ -1,4 +1,4 @@
-package com.ssg.order.api.global.core;
+package com.ssg.order.api.global.core.config;
 
 import static com.ssg.order.domain.common.annotation.constants.CommonConstants.UNAUTHORIZED_MESSAGE;
 

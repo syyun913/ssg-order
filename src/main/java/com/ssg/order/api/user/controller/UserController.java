@@ -1,6 +1,7 @@
 package com.ssg.order.api.user.controller;
 
 import com.ssg.order.api.auth.service.AuthenticationService;
+import com.ssg.order.api.auth.service.response.LoginResponse;
 import com.ssg.order.api.global.common.response.CommonResponse;
 import com.ssg.order.api.user.service.UserSerivce;
 import com.ssg.order.api.user.service.request.LoginRequest;
@@ -26,7 +27,9 @@ public class UserController {
     @Operation(summary = "사용자 로그인")
     @PostMapping("/login")
     public ResponseEntity<CommonResponse> login(@RequestBody @Valid LoginRequest request) {
-        return ResponseEntity.ok(CommonResponse.of("로그인에 성공하였습니다.", authenticationService.authenticate(request)));
+        LoginResponse authentication = authenticationService.authenticate(request);
+
+        return ResponseEntity.ok(CommonResponse.of("로그인에 성공하였습니다.", authentication));
     }
 
     @Operation(summary = "회원가입")
