@@ -3,6 +3,7 @@ package com.ssg.order.api.global.core.config;
 import static com.ssg.order.domain.common.annotation.constants.CommonConstants.UNAUTHORIZED_MESSAGE;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssg.order.api.auth.service.LogoutService;
 import com.ssg.order.api.global.common.response.ExceptionResponse;
 import com.ssg.order.infra.jwt.JwtAuthenticationFilter;
 import java.io.PrintWriter;
@@ -20,6 +21,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -29,6 +31,9 @@ public class SecurityConfig {
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    @Autowired
+    private LogoutService logoutService;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -36,19 +41,23 @@ public class SecurityConfig {
             .headers(h -> h.frameOptions(f -> f.disable()))
             .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/user/**", "/swagger-ui/**", "/v3/api-docs/**", "/h2-console/**").permitAll()
+                .requestMatchers("/user/**", "/view/**", "/swagger-ui/**", "/v3/api-docs/**", "/v3/api-docs", "/h2-console/**", "/favicon.ico").permitAll()
                 .anyRequest().authenticated()
             )
             .exceptionHandling(exception -> exception
                 .defaultAuthenticationEntryPointFor((request, response, authException) -> {
                     if (request.getRequestURI().equals("/")) {
-                        response.sendRedirect("/user/login-page");
+                        response.sendRedirect("/view/user/login-page");
                     } else {
                         authenticationEntryPoint().commence(request, response, authException);
                     }
                 }, request -> true)
             )
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .logout(logout -> logout.logoutUrl("/user/logout")
+                .addLogoutHandler(logoutService)
+                .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
+            );;
 
         return http.build();
     }

@@ -16,6 +16,10 @@ public enum BusinessErrorCode {
     EXIST_USER(
         BAD_REQUEST,
         "이미 존재하는 사용자입니다."
+    ),
+    INVALID_TOKEN(
+        BAD_REQUEST,
+        "유효하지 않은 토큰입니다."
     )
     ;
 

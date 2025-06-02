@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,5 +38,13 @@ public class UserController {
     public ResponseEntity<CommonResponse> register(@RequestBody @Valid RegisterRequest request) {
         userSerivce.register(request);
         return ResponseEntity.ok(CommonResponse.of("회원가입에 성공하였습니다.", null));
+    }
+
+    @Operation(summary = "로그아웃")
+    @PostMapping("/logout")
+    public ResponseEntity<CommonResponse> logout(@RequestHeader("Authorization") String authorizationHeader) {
+        // 로그아웃 로직은 LogoutService에서 처리
+        // 현재는 단순히 성공 응답을 반환
+        return ResponseEntity.ok(CommonResponse.of("로그아웃에 성공하였습니다.", null));
     }
 }
