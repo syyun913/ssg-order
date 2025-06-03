@@ -14,7 +14,7 @@
                         <h3 class="text-center">로그인</h3>
                     </div>
                     <div class="card-body">
-                        <form th:action="@{/user/login}" method="post" id="loginForm">
+                        <form th:action="@{/users/login}" method="post" id="loginForm">
                             <div class="mb-3">
                                 <label for="userName" class="form-label">사용자 이름</label>
                                 <input type="text" class="form-control" id="userName" name="userName" required>
@@ -28,7 +28,7 @@
                             </div>
                         </form>
                         <div class="text-center mt-3">
-                            <p>계정이 없으신가요? <a th:href="@{/view/user/register-page}">회원가입</a></p>
+                            <p>계정이 없으신가요? <a th:href="@{/view/users/register-page}">회원가입</a></p>
                         </div>
                     </div>
                 </div>
@@ -46,7 +46,7 @@
                 password: document.getElementById('password').value
             };
 
-            fetch('/user/login', {
+            fetch('/users/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

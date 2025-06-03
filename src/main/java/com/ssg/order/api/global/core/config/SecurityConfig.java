@@ -41,20 +41,20 @@ public class SecurityConfig {
             .headers(h -> h.frameOptions(f -> f.disable()))
             .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/user/**", "/view/**", "/swagger-ui/**", "/v3/api-docs/**", "/v3/api-docs", "/h2-console/**", "/favicon.ico").permitAll()
+                .requestMatchers("/users/**", "/view/**", "/swagger-ui/**", "/v3/api-docs/**", "/v3/api-docs", "/h2-console/**", "/favicon.ico").permitAll()
                 .anyRequest().authenticated()
             )
             .exceptionHandling(exception -> exception
                 .defaultAuthenticationEntryPointFor((request, response, authException) -> {
                     if (request.getRequestURI().equals("/")) {
-                        response.sendRedirect("/view/user/login-page");
+                        response.sendRedirect("/view/users/login-page");
                     } else {
                         authenticationEntryPoint().commence(request, response, authException);
                     }
                 }, request -> true)
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-            .logout(logout -> logout.logoutUrl("/user/logout")
+            .logout(logout -> logout.logoutUrl("/users/logout")
                 .addLogoutHandler(logoutService)
                 .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
             );

@@ -14,7 +14,7 @@
                         <h3 class="text-center">회원가입</h3>
                     </div>
                     <div class="card-body">
-                        <form th:action="@{/user/register}" method="post" id="registerForm">
+                        <form th:action="@{/users/register}" method="post" id="registerForm">
                             <div class="mb-3">
                                 <label for="userName" class="form-label">아이디</label>
                                 <input type="text" class="form-control" id="userName" name="userName" required>
@@ -30,7 +30,7 @@
                             </div>
                         </form>
                         <div class="text-center mt-3">
-                            <p>이미 계정이 있으신가요? <a th:href="@{/view/user/login-page}">로그인</a></p>
+                            <p>이미 계정이 있으신가요? <a th:href="@{/view/users/login-page}">로그인</a></p>
                         </div>
                     </div>
                 </div>
@@ -75,7 +75,7 @@
                 password: password
             };
 
-            fetch('/user/register', {
+            fetch('/users/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -93,7 +93,7 @@
             })
             .then(data => {
                 alert(data.message);
-                window.location.href = '/view/user/login-page';
+                window.location.href = '/view/users/login-page';
             })
             .catch(error => {
                 console.error('Error:', error);

@@ -4,19 +4,84 @@
     <meta charset="UTF-8">
     <title>메인 페이지</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-size: 14px;
+        }
+        h1 {
+            font-size: 1.8rem;
+        }
+        h2 {
+            font-size: 1.4rem;
+        }
+        h5 {
+            font-size: 1.1rem;
+        }
+        .product-card {
+            transition: transform 0.2s;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .product-price {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #28a745;
+        }
+        .product-stock {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        .card-title {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .btn {
+            font-size: 0.9rem;
+            padding: 0.375rem 0.75rem;
+        }
+        .card-body {
+            padding: 0.75rem;
+        }
+        .product-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.25rem;
+        }
+        .price-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .logout-link {
+            color: #6c757d;
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: block;
+            text-align: right;
+            margin-bottom: 1.5rem;
+        }
+        .logout-link:hover {
+            color: #495057;
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
+    <div class="container mt-4">
         <div class="row">
             <div class="col-md-12">
-                <h1 class="text-center mb-4">주문 관리 시스템</h1>
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">환영합니다!</h5>
-                        <p class="card-text">로그인에 성공했습니다.</p>
-                        <div class="text-right">
-                            <button onclick="handleLogout()" class="btn btn-danger">로그아웃</button>
-                        </div>
+                <h1 class="text-center mb-3">주문 관리 시스템</h1>
+                <span onclick="handleLogout()" class="logout-link">로그아웃</span>
+
+                <!-- 상품 목록 섹션 -->
+                <div class="mt-4">
+                    <h2 class="mb-3">주문 가능한 상품 목록</h2>
+                    <div id="productList" class="row">
+                        <!-- 상품 목록이 여기에 동적으로 추가됩니다 -->
                     </div>
                 </div>
             </div>
@@ -26,10 +91,74 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
+        // 페이지 로드 시 상품 목록 조회
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchProducts();
+        });
+
+        function fetchProducts() {
+            const token = localStorage.getItem('accessToken');
+            
+            fetch('/products', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('상품 목록 조회에 실패했습니다.');
+                }
+                return response.json();
+            })
+            .then(result => {
+                // result가 배열이거나, {data: [...]} 구조 모두 지원
+                let products = Array.isArray(result) ? result : result.data;
+                displayProducts(products);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert(error.message);
+            });
+        }
+
+        function displayProducts(products) {
+            const productList = document.getElementById('productList');
+            productList.innerHTML = '';
+
+            if (!products || products.length === 0) {
+                productList.innerHTML = '<div class="col-12 text-center text-muted py-4">주문 가능한 상품이 없습니다.</div>';
+                return;
+            }
+
+            products.forEach(product => {
+                const finalPrice = product.sellingPrice - product.discountAmount;
+                const productCard = `
+                    <div class="col-md-4 mb-3">
+                        <div class="card product-card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">${product.productName}</h5>
+                                <div class="product-info">
+                                    <div class="price-info">
+                                        <span class="product-price">${finalPrice.toLocaleString()}원</span>
+                                        ${product.discountAmount > 0 ? 
+                                            `<small class="text-muted"><del>${product.sellingPrice.toLocaleString()}원</del></small>` 
+                                            : ''}
+                                    </div>
+                                    <span class="product-stock">재고: ${product.stock}개</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                productList.innerHTML += productCard;
+            });
+        }
+
         function handleLogout() {
             const token = localStorage.getItem('accessToken');
             
-            fetch('/user/logout', {
+            fetch('/users/logout', {
                 method: 'POST',
                 headers: {
                     'Authorization': 'Bearer ' + token
@@ -37,11 +166,9 @@
             })
             .then(response => {
                 if (response.ok) {
-                    // 로컬 스토리지의 토큰 정보 삭제
                     localStorage.removeItem('accessToken');
                     localStorage.removeItem('refreshToken');
-                    // 로그인 페이지로 리다이렉트
-                    window.location.href = '/view/user/login-page';
+                    window.location.href = '/view/users/login-page';
                 } else {
                     throw new Error('로그아웃에 실패했습니다.');
                 }
