@@ -25,7 +25,7 @@ public class ProductController {
     @Operation(summary = "상품 목록 조회", description = "전체 상품 목록을 조회합니다.")
     @GetMapping
     public ResponseEntity<CommonResponse<List<ProductResponse>>> retrieveProducts(@RequestHeader("Authorization") String authorizationHeader) {
-        return ResponseEntity.ok(CommonResponse.of(productService.findAllProducts().stream()
+        return ResponseEntity.ok(CommonResponse.of("상품을 성공적으로 조회하였습니다.", productService.findAllProducts().stream()
             .map(productDtoMapper::domainToProductResponse)
             .toList()));
     }
