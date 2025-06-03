@@ -1,4 +1,4 @@
-package com.ssg.order.infra.jwt;
+package com.ssg.order.api.user.service;
 
 import com.ssg.order.domain.user.User;
 import com.ssg.order.domain.user.usecase.UserUseCase;

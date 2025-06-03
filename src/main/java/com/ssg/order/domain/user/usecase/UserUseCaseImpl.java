@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 
 @UseCase
 @RequiredArgsConstructor
-public class UseUseCaseImpl implements UserUseCase {
+class UserUseCaseImpl implements UserUseCase {
     private final UserReadRepository userReadRepository;
     private final UserWriteRepository userWriteRepository;
 
