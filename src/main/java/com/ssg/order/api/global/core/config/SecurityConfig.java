@@ -5,7 +5,7 @@ import static com.ssg.order.domain.common.annotation.constants.CommonConstants.U
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssg.order.api.user.service.LogoutService;
 import com.ssg.order.api.global.common.response.ExceptionResponse;
-import com.ssg.order.infra.jwt.JwtAuthenticationFilter;
+import com.ssg.order.api.global.core.filter.JwtAuthenticationFilter;
 import java.io.PrintWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

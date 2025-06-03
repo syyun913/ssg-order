@@ -10,9 +10,9 @@ import com.ssg.order.api.user.service.response.ReissueResponse;
 import com.ssg.order.domain.cache.CacheStore;
 import com.ssg.order.domain.common.annotation.exception.BusinessException;
 import com.ssg.order.domain.common.annotation.exception.code.BusinessErrorCode;
+import com.ssg.order.domain.token.TokenHandler;
 import com.ssg.order.domain.user.User;
 import com.ssg.order.domain.user.usecase.UserUseCase;
-import com.ssg.order.infra.jwt.util.JwtUtil;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +21,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +32,7 @@ public class UserSerivce {
     private final UserDtoMapper userDtoMapper;
     private final UserUseCase userUseCase;
     private final CacheStore cacheStore;
-    private final JwtUtil jwtUtil;
+    private final TokenHandler tokenHandler;
 
     @Value("${security.jwt.access-expiration-minutes}")
     private long accessExpirationMinutes;
@@ -47,8 +47,8 @@ public class UserSerivce {
 
         User user = userUseCase.findUserByUserName(loginRequest.getUserName());
 
-        String accessToken = jwtUtil.generateToken(user.getUserName(), accessExpirationMinutes * 60 * 1000L);
-        String refreshToken = jwtUtil.generateToken(user.getUserName(), refreshExpirationDays * 24 * 60 * 60 * 1000L);
+        String accessToken = tokenHandler.generateToken(user.getUserName(), accessExpirationMinutes * 60 * 1000L);
+        String refreshToken = tokenHandler.generateToken(user.getUserName(), refreshExpirationDays * 24 * 60 * 60 * 1000L);
 
         // Refresh Token을 Redis에 저장
         cacheStore.put(
@@ -76,13 +76,13 @@ public class UserSerivce {
 
     public ReissueResponse reissue(String refreshToken) {
 
-        String userId = jwtUtil.getIdFromToken(refreshToken);
+        String userId = tokenHandler.getIdFromToken(refreshToken);
         String savedRefreshToken = cacheStore.get(JWT_REFRESH_TOKEN_PREFIX + userId, String.class);
         if (ObjectUtils.isEmpty(savedRefreshToken) || !refreshToken.equals(savedRefreshToken)) {
             throw new BusinessException(BusinessErrorCode.INVALID_TOKEN);
         }
 
-        String newAccessToken = jwtUtil.generateToken(userId, accessExpirationMinutes * 60 * 1000L);
+        String newAccessToken = tokenHandler.generateToken(userId, accessExpirationMinutes * 60 * 1000L);
 
         return ReissueResponse.builder()
             .accessToken(newAccessToken)

@@ -5,7 +5,7 @@ import static com.ssg.order.domain.common.annotation.constants.CommonConstants.J
 import com.ssg.order.domain.cache.CacheStore;
 import com.ssg.order.domain.common.annotation.exception.BusinessException;
 import com.ssg.order.domain.common.annotation.exception.code.BusinessErrorCode;
-import com.ssg.order.infra.jwt.util.JwtUtil;
+import com.ssg.order.domain.token.TokenHandler;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class LogoutService implements LogoutHandler {
-    private final JwtUtil jwtUtil;
+    private final TokenHandler tokenHandler;
 
     private final CacheStore cacheStore;
 
@@ -31,13 +31,13 @@ public class LogoutService implements LogoutHandler {
 
         String token = authorization.substring(7);
 
-        if (!jwtUtil.validateToken(token)) {
+        if (!tokenHandler.validateToken(token)) {
             throw new BusinessException(BusinessErrorCode.INVALID_TOKEN, "authorization : " + authorization);
         }
 
-        jwtUtil.invalidateToken(token);
+        tokenHandler.invalidateToken(token);
 
-        String userId = jwtUtil.getIdFromToken(token);
+        String userId = tokenHandler.getIdFromToken(token);
         cacheStore.delete(JWT_REFRESH_TOKEN_PREFIX + userId);
     }
 }

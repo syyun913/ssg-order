@@ -1,30 +1,27 @@
-package com.ssg.order.infra.jwt.util;
+package com.ssg.order.infra.jwt;
 
-import com.ssg.order.infra.jwt.BlacklistService;
+import com.ssg.order.domain.token.BlacklistHandler;
+import com.ssg.order.domain.token.TokenHandler;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import java.security.Key;
+import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.security.Key;
-import java.util.Date;
-
 @Component
 @RequiredArgsConstructor
-public class JwtUtil {
+public class JwtService implements TokenHandler {
     @Value("${security.jwt.key}")
     private String secret;
 
-    private final BlacklistService blacklistService;
+    private final BlacklistHandler blacklistHandler;
 
-    private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes());
-    }
-
+    @Override
     public String generateToken(String name, long expirationMs) {
         return Jwts.builder()
             .setSubject(name)
@@ -34,6 +31,7 @@ public class JwtUtil {
             .compact();
     }
 
+    @Override
     public String getIdFromToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
@@ -43,9 +41,10 @@ public class JwtUtil {
                 .getSubject();
     }
 
+    @Override
     public boolean validateToken(String token) {
         try {
-            if (blacklistService.isBlacklisted(token)) {
+            if (blacklistHandler.isBlacklisted(token)) {
                 return false;
             }
 
@@ -56,6 +55,7 @@ public class JwtUtil {
         }
     }
 
+    @Override
     public long getExpirationTimeInSeconds(String token) {
         try {
             Claims claims = Jwts.parserBuilder()
@@ -74,10 +74,15 @@ public class JwtUtil {
         }
     }
 
+    @Override
     public void invalidateToken(String token) {
         long expirationTime = getExpirationTimeInSeconds(token);
         if (expirationTime > 0) {
-            blacklistService.addToBlacklist(token, expirationTime);
+            blacklistHandler.addToBlacklist(token, expirationTime);
         }
+    }
+
+    private Key getSigningKey() {
+        return Keys.hmacShaKeyFor(secret.getBytes());
     }
 }
