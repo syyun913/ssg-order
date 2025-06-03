@@ -34,10 +34,6 @@ jobs:
       if: ${{ always() }}
       with:
         files: build/test-results/**/*.xml
-        check_name: "Unit Test Results"
-        fail_on: "test-failures"
-        comment_mode: "create new"
-        comment_title: "Unit Test Results"
     
     - name: Cleanup Gradle Cache
       if: ${{ always() }}
