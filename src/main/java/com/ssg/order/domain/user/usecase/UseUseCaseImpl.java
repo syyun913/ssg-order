@@ -4,13 +4,11 @@ import com.ssg.order.domain.common.annotation.UseCase;
 import com.ssg.order.domain.user.User;
 import com.ssg.order.domain.user.repository.UserReadRepository;
 import com.ssg.order.domain.user.repository.UserWriteRepository;
-import com.ssg.order.infra.persistence.user.mapper.UserPersistenceMapper;
 import lombok.RequiredArgsConstructor;
 
 @UseCase
 @RequiredArgsConstructor
 public class UseUseCaseImpl implements UserUseCase {
-    private final UserPersistenceMapper mapper;
     private final UserReadRepository userReadRepository;
     private final UserWriteRepository userWriteRepository;
 
