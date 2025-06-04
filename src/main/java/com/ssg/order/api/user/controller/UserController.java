@@ -27,7 +27,9 @@ public class UserController {
 
     @Operation(summary = "사용자 로그인")
     @PostMapping("/login")
-    public ResponseEntity<CommonResponse<LoginResponse>> login(@RequestBody @Valid LoginRequest request) {
+    public ResponseEntity<CommonResponse<LoginResponse>> login(
+        @RequestBody @Valid LoginRequest request
+    ) {
         LoginResponse loginResponse = userSerivce.login(request);
 
         return ResponseEntity.ok(CommonResponse.of("로그인에 성공하였습니다.", loginResponse));
@@ -35,21 +37,27 @@ public class UserController {
 
     @Operation(summary = "회원가입")
     @PostMapping("/register")
-    public ResponseEntity<CommonResponse<?>> register(@RequestBody @Valid RegisterRequest request) {
+    public ResponseEntity<CommonResponse<?>> register(
+        @RequestBody @Valid RegisterRequest request
+    ) {
         userSerivce.register(request);
         return ResponseEntity.ok(CommonResponse.of("회원가입에 성공하였습니다."));
     }
 
     @Operation(summary = "로그아웃")
     @PostMapping("/logout")
-    public ResponseEntity<CommonResponse<?>> logout(@RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseEntity<CommonResponse<?>> logout(
+        @RequestHeader("Authorization") String authorizationHeader
+    ) {
         // 로그아웃 로직은 LogoutService에서 처리
         return ResponseEntity.ok(CommonResponse.of("로그아웃에 성공하였습니다."));
     }
 
     @Operation(summary = "access 토큰 재발행")
     @PostMapping("/reissue")
-    public ResponseEntity<CommonResponse<ReissueResponse>> reissue(@RequestBody @Valid ReissueRequest request) {
+    public ResponseEntity<CommonResponse<ReissueResponse>> reissue(
+        @RequestBody @Valid ReissueRequest request
+    ) {
         return ResponseEntity.ok(CommonResponse.of(userSerivce.reissue(request.getRefreshToken())));
     }
 }
