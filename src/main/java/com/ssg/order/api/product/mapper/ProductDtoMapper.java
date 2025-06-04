@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ProductDtoMapper {
-    public ProductResponse domainToProductResponse(Product product) {
+    public ProductResponse toProductResponse(Product product) {
         if (product == null) {
             return null;
         }

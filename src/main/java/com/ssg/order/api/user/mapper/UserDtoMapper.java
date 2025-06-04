@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class UserDtoMapper {
-    public User registerRequestToDomain(RegisterRequest registerRequest) {
+    public User toDomain(RegisterRequest registerRequest) {
         if (registerRequest == null) {
             return null;
         }
