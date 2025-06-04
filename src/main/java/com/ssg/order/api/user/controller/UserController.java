@@ -1,6 +1,6 @@
 package com.ssg.order.api.user.controller;
 
-import com.ssg.order.api.user.controller.response.LoginResponse;
+import com.ssg.order.api.user.service.response.LoginResponse;
 import com.ssg.order.api.global.common.response.CommonResponse;
 import com.ssg.order.api.user.service.UserSerivce;
 import com.ssg.order.api.user.service.request.LoginRequest;

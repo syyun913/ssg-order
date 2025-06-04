@@ -1,4 +1,4 @@
-package com.ssg.order.api.product.controller.response;
+package com.ssg.order.api.product.service.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
@@ -9,13 +9,17 @@ import lombok.Getter;
 @Builder
 public class ProductResponse {
     @Schema(description = "상품 ID")
-    private final Long id;
+    private Long id;
+
     @Schema(description = "상품명")
-    private final String productName;
+    private String productName;
+
     @Schema(description = "판매가격")
-    private final Integer sellingPrice;
+    private Integer sellingPrice;
+
     @Schema(description = "할인 금액")
-    private final Integer discountAmount;
+    private Integer discountAmount;
+
     @Schema(description = "재고")
-    private final Integer stock;
+    private Integer stock;
 } 

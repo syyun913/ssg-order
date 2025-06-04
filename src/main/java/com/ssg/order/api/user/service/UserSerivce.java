@@ -2,7 +2,7 @@ package com.ssg.order.api.user.service;
 
 import static com.ssg.order.domain.common.annotation.constants.CommonConstants.JWT_REFRESH_TOKEN_PREFIX;
 
-import com.ssg.order.api.user.controller.response.LoginResponse;
+import com.ssg.order.api.user.service.response.LoginResponse;
 import com.ssg.order.api.user.mapper.UserDtoMapper;
 import com.ssg.order.api.user.service.request.LoginRequest;
 import com.ssg.order.api.user.service.request.RegisterRequest;

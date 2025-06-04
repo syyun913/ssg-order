@@ -1,7 +1,7 @@
 package com.ssg.order.api.product.controller;
 
 import com.ssg.order.api.global.common.response.CommonResponse;
-import com.ssg.order.api.product.controller.response.ProductResponse;
+import com.ssg.order.api.product.service.response.ProductResponse;
 import com.ssg.order.api.product.mapper.ProductDtoMapper;
 import com.ssg.order.api.product.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
