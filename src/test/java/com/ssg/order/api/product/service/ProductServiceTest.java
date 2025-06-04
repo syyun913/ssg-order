@@ -5,6 +5,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.ssg.order.api.product.mapper.ProductDtoMapper;
+import com.ssg.order.api.product.service.response.ProductResponse;
 import com.ssg.order.domain.product.Product;
 import com.ssg.order.domain.product.usecase.ProductUseCase;
 import java.util.Arrays;
@@ -24,25 +26,48 @@ class ProductServiceTest {
     @Mock
     private ProductUseCase productUseCase;
 
+    @Mock
+    private ProductDtoMapper productDtoMapper;
+
     @Test
-    @DisplayName("상품 목록 조회 요청 시 모든 상품 목록이 리턴된다")
-    void findAllProducts_shouldReturnProductList() {
+    @DisplayName("상품 목록 조회 요청 시 모든 상품 목록이 ProductResponse로 변환되어 리턴된다")
+    void findAllProducts_ShouldReturnAllProductsAsResponse() {
         // given
         Product product1 = createProduct(1L, "Product1", 1000, 100, 10);
         Product product2 = createProduct(2L, "Product2", 2000, 200, 20);
         List<Product> mockProducts = Arrays.asList(product1, product2);
+        
+        ProductResponse response1 = createProductResponse(1L, "Product1", 1000, 100, 10);
+        ProductResponse response2 = createProductResponse(2L, "Product2", 2000, 200, 20);
+        List<ProductResponse> expectedResponses = Arrays.asList(response1, response2);
+
         when(productUseCase.findAllProducts()).thenReturn(mockProducts);
+        when(productDtoMapper.domainToProductResponse(product1)).thenReturn(response1);
+        when(productDtoMapper.domainToProductResponse(product2)).thenReturn(response2);
 
         // when
-        List<Product> result = productService.findAllProducts();
+        List<ProductResponse> result = productService.findAllProducts();
 
         // then
-        assertThat(result).isEqualTo(mockProducts);
+        assertThat(result).hasSize(2);
+        assertThat(result).isEqualTo(expectedResponses);
         verify(productUseCase, times(1)).findAllProducts();
+        verify(productDtoMapper, times(1)).domainToProductResponse(product1);
+        verify(productDtoMapper, times(1)).domainToProductResponse(product2);
     }
 
     private Product createProduct(Long id, String productName, int sellingPrice, int discountAmount, int stock) {
         return Product.builder()
+                .id(id)
+                .productName(productName)
+                .sellingPrice(sellingPrice)
+                .discountAmount(discountAmount)
+                .stock(stock)
+                .build();
+    }
+
+    private ProductResponse createProductResponse(Long id, String productName, int sellingPrice, int discountAmount, int stock) {
+        return ProductResponse.builder()
                 .id(id)
                 .productName(productName)
                 .sellingPrice(sellingPrice)
