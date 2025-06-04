@@ -7,6 +7,7 @@ import com.ssg.order.domain.product.Product;
 import com.ssg.order.domain.product.repository.ProductReadRepository;
 import java.util.Arrays;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,6 +23,7 @@ class ProductUseCaseImplTest {
     private ProductReadRepository productReadRepository;
 
     @Test
+    @DisplayName("상품 목록 조회 요청 시 모든 상품 목록이 리턴된다")
     void findAllProducts_ShouldReturnAllProducts() {
         // given
         Product product1 = createProduct(1L, "Product1", 1000, 100, 10);
