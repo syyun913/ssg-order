@@ -4,6 +4,8 @@ import com.ssg.order.api.global.common.response.CommonResponse;
 import com.ssg.order.api.product.service.ProductService;
 import com.ssg.order.api.product.service.response.ProductResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ public class ProductController {
     private final ProductService productService;
 
     @Operation(summary = "상품 목록 조회", description = "전체 상품 목록을 조회합니다.")
+    @Parameter(name = "Authorization", description = "인가를 위한 Access 토큰", in = ParameterIn.HEADER, required = true)
     @GetMapping
     public ResponseEntity<CommonResponse<List<ProductResponse>>> retrieveProducts(@RequestHeader("Authorization") String authorizationHeader) {
         List<ProductResponse> productResponses = productService.findAllProducts();
