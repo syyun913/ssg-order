@@ -17,7 +17,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public List<ProductResponse> findAllProducts() {
         return productUseCase.findAllProducts().stream()
-            .map(productDtoMapper::domainToProductResponse)
+            .map(productDtoMapper::toProductResponse)
             .toList();
     }
 }

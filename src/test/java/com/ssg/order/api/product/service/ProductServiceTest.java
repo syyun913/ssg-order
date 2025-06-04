@@ -42,8 +42,8 @@ class ProductServiceTest {
         List<ProductResponse> expectedResponses = Arrays.asList(response1, response2);
 
         when(productUseCase.findAllProducts()).thenReturn(mockProducts);
-        when(productDtoMapper.domainToProductResponse(product1)).thenReturn(response1);
-        when(productDtoMapper.domainToProductResponse(product2)).thenReturn(response2);
+        when(productDtoMapper.toProductResponse(product1)).thenReturn(response1);
+        when(productDtoMapper.toProductResponse(product2)).thenReturn(response2);
 
         // when
         List<ProductResponse> result = productService.findAllProducts();
@@ -52,8 +52,8 @@ class ProductServiceTest {
         assertThat(result).hasSize(2);
         assertThat(result).isEqualTo(expectedResponses);
         verify(productUseCase, times(1)).findAllProducts();
-        verify(productDtoMapper, times(1)).domainToProductResponse(product1);
-        verify(productDtoMapper, times(1)).domainToProductResponse(product2);
+        verify(productDtoMapper, times(1)).toProductResponse(product1);
+        verify(productDtoMapper, times(1)).toProductResponse(product2);
     }
 
     private Product createProduct(Long id, String productName, int sellingPrice, int discountAmount, int stock) {
