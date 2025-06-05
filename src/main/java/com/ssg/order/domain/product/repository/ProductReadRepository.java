@@ -5,4 +5,5 @@ import java.util.List;
 
 public interface ProductReadRepository {
     List<Product> findAllProducts();
+    List<Product> findProductsByProductIds(List<Long> productIds);
 } 

@@ -1,0 +1,40 @@
+package com.ssg.order.api.order.controller;
+
+import com.ssg.order.api.global.LoginUser;
+import com.ssg.order.api.global.common.response.CommonResponse;
+import com.ssg.order.api.order.service.OrderService;
+import com.ssg.order.api.order.service.request.CreateOrderRequest;
+import com.ssg.order.api.order.service.response.CreateOrderResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@Tag(name = "주문 서비스", description = "주문 관련 API")
+@RestController
+@RequestMapping("/orders")
+@RequiredArgsConstructor
+public class OrderController {
+    private final OrderService orderService;
+
+    @Operation(summary = "주문 생성 요청")
+    @Parameter(name = "Authorization", description = "인가를 위한 토큰", in = ParameterIn.HEADER, required = true)
+    @PostMapping
+    public ResponseEntity<CommonResponse<CreateOrderResponse>> createOrder(
+        @RequestBody @Valid CreateOrderRequest createOrderRequest,
+        @AuthenticationPrincipal LoginUser loginUser
+    ) {
+        CreateOrderResponse createOrderResponse = orderService.createOrder(loginUser.getId(), createOrderRequest);
+
+        return ResponseEntity.ok(CommonResponse.of("주문이 성공적으로 생성되었습니다.", createOrderResponse));
+    }
+}

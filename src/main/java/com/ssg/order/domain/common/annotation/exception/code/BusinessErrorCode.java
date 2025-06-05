@@ -9,6 +9,9 @@ import org.springframework.http.HttpStatus;
 @Getter
 @AllArgsConstructor
 public enum BusinessErrorCode {
+    /*
+     * 400 BAD_REQUEST
+     */
     NOT_FOUND_USER(
         BAD_REQUEST,
         "사용자를 찾을 수 없습니다."
@@ -20,6 +23,14 @@ public enum BusinessErrorCode {
     INVALID_TOKEN(
         BAD_REQUEST,
         "유효하지 않은 토큰입니다."
+    ),
+    OUT_OF_STOCK(
+        BAD_REQUEST,
+        "상품 재고가 부족합니다."
+    ),
+    NOT_FOUND_PRODUCT(
+        BAD_REQUEST,
+        "상품을 조회할 수 없습니다."
     )
     ;
 

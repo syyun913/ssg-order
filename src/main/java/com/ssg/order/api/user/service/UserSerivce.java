@@ -71,7 +71,7 @@ public class UserSerivce {
                 BusinessErrorCode.EXIST_USER,
                 "userName: " + registerRequest.getUserName());
         }
-        userUseCase.saveUser(userDtoMapper.registerRequestToDomain(registerRequest));
+        userUseCase.saveUser(userDtoMapper.toDomain(registerRequest));
     }
 
     public ReissueResponse reissue(String refreshToken) {

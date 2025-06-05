@@ -5,4 +5,6 @@ import java.util.List;
 
 public interface ProductUseCase {
     List<Product> findAllProducts();
+    List<Product> findProductsByProductIds(List<Long> productIds);
+    void updateProductStock(Long productId, int decreaseQuantity);
 }
