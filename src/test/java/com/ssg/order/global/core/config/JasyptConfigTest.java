@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 
+@DisplayName("Jasypt 암호화 테스트")
 @SpringBootTest
 class JasyptConfigTest {
     @Autowired

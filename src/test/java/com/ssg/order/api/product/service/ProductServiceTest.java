@@ -18,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+@DisplayName("상품 서비스 테스트")
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
     @InjectMocks
@@ -54,6 +55,20 @@ class ProductServiceTest {
         verify(productUseCase, times(1)).findAllProducts();
         verify(productDtoMapper, times(1)).toProductResponse(product1);
         verify(productDtoMapper, times(1)).toProductResponse(product2);
+    }
+
+    @Test
+    @DisplayName("상품 목록 조회 요청 시 상품 데이터가 존재하지 않으면 빈 리스트가 리턴된다")
+    void findAllProducts_ShouldReturnEmptyListWhenNoProductsExist() {
+        // given
+        when(productUseCase.findAllProducts()).thenReturn(List.of());
+
+        // when
+        List<ProductResponse> result = productService.findAllProducts();
+
+        // then
+        assertThat(result).isEmpty();
+        verify(productUseCase, times(1)).findAllProducts();
     }
 
     private Product createProduct(Long id, String productName, int sellingPrice, int discountAmount, int stock) {
