@@ -41,7 +41,7 @@ public class UserController {
         @RequestBody @Valid RegisterRequest request
     ) {
         userSerivce.register(request);
-        return ResponseEntity.ok(CommonResponse.of("회원가입에 성공하였습니다."));
+        return ResponseEntity.ok(CommonResponse.of("회원가입에 성공하였습니다.", null));
     }
 
     @Operation(summary = "로그아웃")
@@ -50,7 +50,7 @@ public class UserController {
         @RequestHeader("Authorization") String authorizationHeader
     ) {
         // 로그아웃 로직은 LogoutService에서 처리
-        return ResponseEntity.ok(CommonResponse.of("로그아웃에 성공하였습니다."));
+        return ResponseEntity.ok(CommonResponse.of("로그아웃에 성공하였습니다.", null));
     }
 
     @Operation(summary = "access 토큰 재발행")
