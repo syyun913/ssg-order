@@ -1,7 +1,7 @@
 package com.ssg.order.api.product.mapper;
 
 import com.ssg.order.api.product.service.response.ProductResponse;
-import com.ssg.order.domain.product.Product;
+import com.ssg.order.domain.domain.product.Product;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -1,7 +1,7 @@
 package com.ssg.order.infra.persistence.order.mapper;
 
-import com.ssg.order.domain.order.Order;
-import com.ssg.order.domain.order.OrderProduct;
+import com.ssg.order.domain.domain.order.Order;
+import com.ssg.order.domain.domain.order.OrderProduct;
 import com.ssg.order.infra.persistence.order.entity.OrderEntity;
 import com.ssg.order.infra.persistence.order.entity.OrderProductEntity;
 import java.util.List;

@@ -1,6 +1,6 @@
 package com.ssg.order.infra.persistence.order.entity;
 
-import com.ssg.order.domain.order.enumtype.OrderStatusCode;
+import com.ssg.order.domain.domain.order.enumtype.OrderStatusCode;
 import com.ssg.order.infra.persistence.common.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

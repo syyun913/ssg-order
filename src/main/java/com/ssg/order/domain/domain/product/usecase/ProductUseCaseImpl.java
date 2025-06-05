@@ -1,9 +1,9 @@
-package com.ssg.order.domain.product.usecase;
+package com.ssg.order.domain.domain.product.usecase;
 
 import com.ssg.order.domain.common.annotation.UseCase;
-import com.ssg.order.domain.product.Product;
-import com.ssg.order.domain.product.repository.ProductReadRepository;
-import com.ssg.order.domain.product.repository.ProductWriteRepository;
+import com.ssg.order.domain.domain.product.Product;
+import com.ssg.order.domain.domain.product.repository.ProductReadRepository;
+import com.ssg.order.domain.domain.product.repository.ProductWriteRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 

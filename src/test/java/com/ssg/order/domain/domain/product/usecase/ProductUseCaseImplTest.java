@@ -1,10 +1,10 @@
-package com.ssg.order.domain.product.usecase;
+package com.ssg.order.domain.domain.product.usecase;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-import com.ssg.order.domain.product.Product;
-import com.ssg.order.domain.product.repository.ProductReadRepository;
+import com.ssg.order.domain.domain.product.Product;
+import com.ssg.order.domain.domain.product.repository.ProductReadRepository;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;

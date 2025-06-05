@@ -2,9 +2,9 @@ package com.ssg.order.infra.persistence.user;
 
 import com.ssg.order.domain.common.annotation.exception.BusinessException;
 import com.ssg.order.domain.common.annotation.exception.code.BusinessErrorCode;
-import com.ssg.order.domain.user.User;
-import com.ssg.order.domain.user.repository.UserReadRepository;
-import com.ssg.order.domain.user.repository.UserWriteRepository;
+import com.ssg.order.domain.domain.user.User;
+import com.ssg.order.domain.domain.user.repository.UserReadRepository;
+import com.ssg.order.domain.domain.user.repository.UserWriteRepository;
 import com.ssg.order.infra.persistence.user.entity.UserEntity;
 import com.ssg.order.infra.persistence.user.mapper.UserPersistenceMapper;
 import com.ssg.order.infra.persistence.user.repository.UserJpaRepository;

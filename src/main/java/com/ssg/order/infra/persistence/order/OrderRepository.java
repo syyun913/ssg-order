@@ -1,7 +1,7 @@
 package com.ssg.order.infra.persistence.order;
 
-import com.ssg.order.domain.order.Order;
-import com.ssg.order.domain.order.repository.OrderWriteRepository;
+import com.ssg.order.domain.domain.order.Order;
+import com.ssg.order.domain.domain.order.repository.OrderWriteRepository;
 import com.ssg.order.infra.persistence.order.entity.OrderEntity;
 import com.ssg.order.infra.persistence.order.entity.OrderProductEntity;
 import com.ssg.order.infra.persistence.order.mapper.OrderPersistenceMapper;

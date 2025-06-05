@@ -1,6 +1,6 @@
 package com.ssg.order.infra.persistence.product.mapper;
 
-import com.ssg.order.domain.product.Product;
+import com.ssg.order.domain.domain.product.Product;
 import com.ssg.order.infra.persistence.product.entity.ProductEntity;
 import org.springframework.stereotype.Component;
 

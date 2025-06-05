@@ -1,7 +1,7 @@
 package com.ssg.order.api.user.mapper;
 
 import com.ssg.order.api.user.service.request.RegisterRequest;
-import com.ssg.order.domain.user.User;
+import com.ssg.order.domain.domain.user.User;
 import org.springframework.stereotype.Component;
 
 @Component

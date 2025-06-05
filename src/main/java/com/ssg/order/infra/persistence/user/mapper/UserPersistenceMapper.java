@@ -1,6 +1,6 @@
 package com.ssg.order.infra.persistence.user.mapper;
 
-import com.ssg.order.domain.user.User;
+import com.ssg.order.domain.domain.user.User;
 import com.ssg.order.infra.persistence.user.entity.UserEntity;
 import org.springframework.stereotype.Component;
 

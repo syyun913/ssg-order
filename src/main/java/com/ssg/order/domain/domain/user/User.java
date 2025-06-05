@@ -1,4 +1,4 @@
-package com.ssg.order.domain.user;
+package com.ssg.order.domain.domain.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

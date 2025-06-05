@@ -7,8 +7,8 @@ import static org.mockito.Mockito.when;
 
 import com.ssg.order.api.product.mapper.ProductDtoMapper;
 import com.ssg.order.api.product.service.response.ProductResponse;
-import com.ssg.order.domain.product.Product;
-import com.ssg.order.domain.product.usecase.ProductUseCase;
+import com.ssg.order.domain.domain.product.Product;
+import com.ssg.order.domain.domain.product.usecase.ProductUseCase;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;

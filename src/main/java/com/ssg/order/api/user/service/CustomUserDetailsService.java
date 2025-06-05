@@ -1,8 +1,8 @@
 package com.ssg.order.api.user.service;
 
 import com.ssg.order.api.global.LoginUser;
-import com.ssg.order.domain.user.User;
-import com.ssg.order.domain.user.usecase.UserUseCase;
+import com.ssg.order.domain.domain.user.User;
+import com.ssg.order.domain.domain.user.usecase.UserUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

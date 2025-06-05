@@ -1,9 +1,9 @@
-package com.ssg.order.domain.user.usecase;
+package com.ssg.order.domain.domain.user.usecase;
 
 import com.ssg.order.domain.common.annotation.UseCase;
-import com.ssg.order.domain.user.User;
-import com.ssg.order.domain.user.repository.UserReadRepository;
-import com.ssg.order.domain.user.repository.UserWriteRepository;
+import com.ssg.order.domain.domain.user.User;
+import com.ssg.order.domain.domain.user.repository.UserReadRepository;
+import com.ssg.order.domain.domain.user.repository.UserWriteRepository;
 import lombok.RequiredArgsConstructor;
 
 @UseCase

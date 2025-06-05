@@ -1,6 +1,6 @@
-package com.ssg.order.domain.order;
+package com.ssg.order.domain.domain.order;
 
-import com.ssg.order.domain.order.enumtype.OrderProductStatusCode;
+import com.ssg.order.domain.domain.order.enumtype.OrderProductStatusCode;
 import lombok.Builder;
 import lombok.Getter;
 

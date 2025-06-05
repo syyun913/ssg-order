@@ -1,6 +1,6 @@
-package com.ssg.order.domain.product.repository;
+package com.ssg.order.domain.domain.product.repository;
 
-import com.ssg.order.domain.product.Product;
+import com.ssg.order.domain.domain.product.Product;
 import java.util.List;
 
 public interface ProductReadRepository {

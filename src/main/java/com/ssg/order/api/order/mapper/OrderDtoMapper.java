@@ -3,9 +3,9 @@ package com.ssg.order.api.order.mapper;
 import com.ssg.order.api.order.service.request.CreateOrderProductRequest;
 import com.ssg.order.api.order.service.response.CreateOrderResponse;
 import com.ssg.order.api.order.service.response.OrderProductResponse;
-import com.ssg.order.domain.order.Order;
-import com.ssg.order.domain.order.OrderProduct;
-import com.ssg.order.domain.order.enumtype.OrderProductStatusCode;
+import com.ssg.order.domain.domain.order.Order;
+import com.ssg.order.domain.domain.order.OrderProduct;
+import com.ssg.order.domain.domain.order.enumtype.OrderProductStatusCode;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

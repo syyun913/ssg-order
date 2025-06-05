@@ -1,10 +1,10 @@
-package com.ssg.order.domain.order.usecase;
+package com.ssg.order.domain.domain.order.usecase;
 
 import com.ssg.order.domain.common.annotation.UseCase;
-import com.ssg.order.domain.order.Order;
-import com.ssg.order.domain.order.OrderProduct;
-import com.ssg.order.domain.order.enumtype.OrderStatusCode;
-import com.ssg.order.domain.order.repository.OrderWriteRepository;
+import com.ssg.order.domain.domain.order.Order;
+import com.ssg.order.domain.domain.order.OrderProduct;
+import com.ssg.order.domain.domain.order.enumtype.OrderStatusCode;
+import com.ssg.order.domain.domain.order.repository.OrderWriteRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 

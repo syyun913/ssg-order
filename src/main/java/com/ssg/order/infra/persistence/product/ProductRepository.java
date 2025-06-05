@@ -2,9 +2,9 @@ package com.ssg.order.infra.persistence.product;
 
 import com.ssg.order.domain.common.annotation.exception.BusinessException;
 import com.ssg.order.domain.common.annotation.exception.code.BusinessErrorCode;
-import com.ssg.order.domain.product.Product;
-import com.ssg.order.domain.product.repository.ProductReadRepository;
-import com.ssg.order.domain.product.repository.ProductWriteRepository;
+import com.ssg.order.domain.domain.product.Product;
+import com.ssg.order.domain.domain.product.repository.ProductReadRepository;
+import com.ssg.order.domain.domain.product.repository.ProductWriteRepository;
 import com.ssg.order.infra.persistence.product.entity.ProductEntity;
 import com.ssg.order.infra.persistence.product.mapper.ProductPersistenceMapper;
 import com.ssg.order.infra.persistence.product.repository.ProductJpaRepository;

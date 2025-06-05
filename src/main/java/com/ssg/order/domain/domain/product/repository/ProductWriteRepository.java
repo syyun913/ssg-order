@@ -1,4 +1,4 @@
-package com.ssg.order.domain.product.repository;
+package com.ssg.order.domain.domain.product.repository;
 
 public interface ProductWriteRepository {
     void updateProductStock(Long productId, int decreaseQuantity);
