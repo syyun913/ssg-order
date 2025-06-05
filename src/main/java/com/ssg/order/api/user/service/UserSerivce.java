@@ -2,7 +2,7 @@ package com.ssg.order.api.user.service;
 
 import static com.ssg.order.domain.common.annotation.constants.CommonConstants.JWT_REFRESH_TOKEN_PREFIX;
 
-import com.ssg.order.api.user.controller.response.LoginResponse;
+import com.ssg.order.api.user.service.response.LoginResponse;
 import com.ssg.order.api.user.mapper.UserDtoMapper;
 import com.ssg.order.api.user.service.request.LoginRequest;
 import com.ssg.order.api.user.service.request.RegisterRequest;
@@ -11,8 +11,8 @@ import com.ssg.order.domain.cache.CacheStore;
 import com.ssg.order.domain.common.annotation.exception.BusinessException;
 import com.ssg.order.domain.common.annotation.exception.code.BusinessErrorCode;
 import com.ssg.order.domain.token.TokenHandler;
-import com.ssg.order.domain.user.User;
-import com.ssg.order.domain.user.usecase.UserUseCase;
+import com.ssg.order.domain.domain.user.User;
+import com.ssg.order.domain.domain.user.usecase.UserUseCase;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
@@ -71,7 +71,7 @@ public class UserSerivce {
                 BusinessErrorCode.EXIST_USER,
                 "userName: " + registerRequest.getUserName());
         }
-        userUseCase.saveUser(userDtoMapper.registerRequestToDomain(registerRequest));
+        userUseCase.saveUser(userDtoMapper.toDomain(registerRequest));
     }
 
     public ReissueResponse reissue(String refreshToken) {

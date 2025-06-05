@@ -27,7 +27,7 @@ public class ModuleConventionRulesTest extends ArchUnitSupport {
         @Test
         @DisplayName("order 하위 패키지 간에 순환 의존성이 없어야 한다.")
         void checkCyclicDependency() {
-            ArchRule rule = slices().matching("..order.(*)..")
+            ArchRule rule = slices().matching("..com.ssg.order.(*)..")
                 .should().beFreeOfCycles();
 
             rule.check(IMPORTED_CLASSES);

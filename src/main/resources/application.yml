@@ -23,7 +23,7 @@ spring:
     redis:
       host: localhost
       port: 6379
-      password: ENC(JF7pv4H6nT9ddiqrebFR6ZkZAYYEFczH)
+      password:
 
 jasypt:
   encryptor:

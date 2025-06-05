@@ -1,14 +1,29 @@
 package com.ssg.order.infra.persistence.order.entity;
 
-import com.ssg.order.domain.order.enumtype.OrderProductStatusCode;
+import com.ssg.order.domain.domain.order.enumtype.OrderProductStatusCode;
 import com.ssg.order.infra.persistence.common.entity.BaseTimeEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 @Getter
 @Entity
+@DynamicInsert
+@DynamicUpdate
 @Table(name = "ORDER_PRODUCT")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OrderProductEntity extends BaseTimeEntity {
@@ -17,8 +32,9 @@ public class OrderProductEntity extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "order_id", nullable = false, updatable = false)
-    private Long orderId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false, updatable = false)
+    private OrderEntity order;
 
     @Column(name = "product_id", nullable = false, updatable = false)
     private Long productId;
@@ -38,4 +54,17 @@ public class OrderProductEntity extends BaseTimeEntity {
 
     @Column(name = "discount_amount", nullable = false)
     private Integer discountAmount;
+
+    @Builder
+    public OrderProductEntity(Long id, OrderEntity order, Long productId, OrderProductStatusCode statusCode,
+                              Integer quantity, Integer paymentPrice, Integer sellingPrice, Integer discountAmount) {
+        this.id = id;
+        this.order = order;
+        this.productId = productId;
+        this.statusCode = statusCode;
+        this.quantity = quantity;
+        this.paymentPrice = paymentPrice;
+        this.sellingPrice = sellingPrice;
+        this.discountAmount = discountAmount;
+    }
 }
