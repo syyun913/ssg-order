@@ -13,8 +13,8 @@ class UserUseCaseImpl implements UserUseCase {
     private final UserWriteRepository userWriteRepository;
 
     @Override
-    public User findUserByUserName(String userName) {
-        return userReadRepository.findUserByUserName(userName);
+    public User getUserByUserName(String userName) {
+        return userReadRepository.getUserByUserName(userName);
     }
 
     @Override

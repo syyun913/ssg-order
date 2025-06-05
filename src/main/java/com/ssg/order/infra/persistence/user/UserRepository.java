@@ -19,7 +19,7 @@ public class UserRepository implements UserReadRepository, UserWriteRepository {
     private final UserJpaRepository userJpaRepository;
 
     @Override
-    public User findUserByUserName(String userName) {
+    public User getUserByUserName(String userName) {
         UserEntity userEntity = userJpaRepository.findByUserName(userName)
                 .orElseThrow(() -> new BusinessException(
                         BusinessErrorCode.NOT_FOUND_USER,

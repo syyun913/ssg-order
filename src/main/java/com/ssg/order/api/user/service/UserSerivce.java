@@ -45,7 +45,7 @@ public class UserSerivce {
             new UsernamePasswordAuthenticationToken(loginRequest.getUserName(), loginRequest.getPassword())
         );
 
-        User user = userUseCase.findUserByUserName(loginRequest.getUserName());
+        User user = userUseCase.getUserByUserName(loginRequest.getUserName());
 
         String accessToken = tokenHandler.generateToken(user.getUserName(), accessExpirationMinutes * 60 * 1000L);
         String refreshToken = tokenHandler.generateToken(user.getUserName(), refreshExpirationDays * 24 * 60 * 60 * 1000L);
