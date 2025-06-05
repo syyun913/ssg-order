@@ -15,5 +15,6 @@ public class CreateOrderRequest {
     @Schema(description = "주문 생성 요청 상품 목록")
     @Valid
     @NotEmpty
+    @Builder.Default
     List<CreateOrderProductRequest> orderProductLists = new ArrayList<>();
 }
