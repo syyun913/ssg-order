@@ -9,16 +9,23 @@
             font-size: 14px;
         }
         h1 {
-            font-size: 1.8rem;
+            font-size: 1.2rem;
+            margin-bottom: 0.7rem;
         }
         h2 {
-            font-size: 1.4rem;
+            font-size: 1.05rem;
+            margin-bottom: 0.5rem;
         }
         h5 {
-            font-size: 1.1rem;
+            font-size: 0.95rem;
+        }
+        .section-title {
+            font-size: 1.05rem;
+            margin-bottom: 0.5rem;
         }
         .product-card {
             transition: transform 0.2s;
+            min-height: unset;
         }
         .product-card:hover {
             transform: translateY(-5px);
@@ -34,15 +41,31 @@
             font-size: 0.9em;
         }
         .card-title {
-            font-size: 1rem;
-            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+            margin-bottom: 0.3rem;
         }
         .btn {
             font-size: 0.9rem;
             padding: 0.375rem 0.75rem;
         }
         .card-body {
-            padding: 0.75rem;
+            padding: 0.5rem 0.7rem;
+        }
+        .card {
+            min-height: unset;
+            margin-bottom: 0.5rem;
+        }
+        .form-group {
+            margin-bottom: 0.3rem;
+        }
+        .form-control {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.92rem;
+            height: 1.8rem;
+        }
+        .table th, .table td {
+            padding: 0.3rem 0.5rem;
+            font-size: 0.92rem;
         }
         .product-info {
             display: flex;
@@ -83,6 +106,19 @@
                     <div id="productList" class="row">
                         <!-- 상품 목록이 여기에 동적으로 추가됩니다 -->
                     </div>
+                </div>
+                <!-- 주문 선택/생성 섹션 -->
+                <div class="mt-5">
+                    <h2 class="mb-3">주문할 상품 선택</h2>
+                    <form id="orderForm">
+                        <div id="orderProductInputs" class="row">
+                            <div id="orderProductEmptyMsg" class="col-12 text-center text-muted py-4">주문 상품을 선택해주세요</div>
+                        </div>
+                        <div id="orderSummary" class="mb-3"></div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary mt-3">주문하기</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -126,18 +162,29 @@
             const productList = document.getElementById('productList');
             productList.innerHTML = '';
 
+            // 주문 선택 영역 초기화
+            selectedProducts = {};
+            updateOrderProductInputs(products);
+
             if (!products || products.length === 0) {
                 productList.innerHTML = '<div class="col-12 text-center text-muted py-4">주문 가능한 상품이 없습니다.</div>';
+                updateOrderProductInputs(products);
                 return;
             }
 
             products.forEach(product => {
                 const finalPrice = product.sellingPrice - product.discountAmount;
+                const disabled = product.stock === 0 ? 'disabled' : '';
                 const productCard = `
                     <div class="col-md-4 mb-3">
                         <div class="card product-card h-100">
                             <div class="card-body">
-                                <h5 class="card-title">${product.productName}</h5>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input product-checkbox" type="checkbox" id="select-product-${product.id}" data-product-id="${product.id}" ${disabled}>
+                                    <label class="form-check-label" for="select-product-${product.id}">
+                                        <h5 class="card-title d-inline">${product.productName}</h5>
+                                    </label>
+                                </div>
                                 <div class="product-info">
                                     <div class="price-info">
                                         <span class="product-price">${finalPrice.toLocaleString()}원</span>
@@ -153,6 +200,114 @@
                 `;
                 productList.innerHTML += productCard;
             });
+
+            // 체크박스 이벤트 바인딩
+            document.querySelectorAll('.product-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const productId = parseInt(this.getAttribute('data-product-id'), 10);
+                    if (this.checked) {
+                        selectedProducts[productId] = products.find(p => p.id === productId);
+                    } else {
+                        delete selectedProducts[productId];
+                    }
+                    updateOrderProductInputs(products);
+                });
+            });
+        }
+
+        // 선택된 상품을 저장할 객체
+        let selectedProducts = {};
+
+        function updateOrderProductInputs(products) {
+            const orderProductInputs = document.getElementById('orderProductInputs');
+            const orderSummary = document.getElementById('orderSummary');
+            const emptyMsg = document.getElementById('orderProductEmptyMsg');
+            orderProductInputs.innerHTML = '';
+            const selectedList = Object.values(selectedProducts);
+            if (selectedList.length === 0) {
+                orderProductInputs.innerHTML = '<div id="orderProductEmptyMsg" class="col-12 text-center text-muted py-4">주문 상품을 선택해주세요</div>';
+                if (orderSummary) orderSummary.innerHTML = '';
+                return;
+            }
+            selectedList.forEach(product => {
+                orderProductInputs.innerHTML += `
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">${product.productName}</h5>
+                                <div class="form-group">
+                                    <label for="quantity-${product.id}">수량 (재고: ${product.stock})</label>
+                                    <input type="number" class="form-control order-quantity-input" id="quantity-${product.id}" name="quantity-${product.id}" min="1" max="${product.stock}" value="1" data-product-id="${product.id}" data-stock="${product.stock}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            // 수량 입력 이벤트 바인딩 (동적 생성 input)
+            document.querySelectorAll('.order-quantity-input').forEach(input => {
+                input.addEventListener('input', function() {
+                    // 수량이 바뀌면 요약 갱신
+                    updateOrderSummary();
+                });
+            });
+            updateOrderSummary();
+        }
+
+        function updateOrderSummary() {
+            const orderSummary = document.getElementById('orderSummary');
+            const selectedList = Object.values(selectedProducts);
+            if (!orderSummary || selectedList.length === 0) {
+                if (orderSummary) orderSummary.innerHTML = '';
+                return;
+            }
+            let totalSelling = 0, totalDiscount = 0, totalPayment = 0;
+            let rows = '';
+            selectedList.forEach(product => {
+                const input = document.getElementById(`quantity-${product.id}`);
+                const quantity = input ? Math.max(1, Math.min(parseInt(input.value, 10) || 1, product.stock)) : 1;
+                const selling = product.sellingPrice * quantity;
+                const discount = product.discountAmount * quantity;
+                const payment = selling - discount;
+                totalSelling += selling;
+                totalDiscount += discount;
+                totalPayment += payment;
+                rows += `
+                    <tr>
+                        <td>${product.productName}</td>
+                        <td>${quantity}</td>
+                        <td>${selling.toLocaleString()}원</td>
+                        <td>${discount.toLocaleString()}원</td>
+                        <td>${payment.toLocaleString()}원</td>
+                    </tr>
+                `;
+            });
+            orderSummary.innerHTML = `
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered mb-2">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>상품명</th>
+                                <th>수량</th>
+                                <th>판매가 합계</th>
+                                <th>할인 합계</th>
+                                <th>결제금액</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rows}
+                        </tbody>
+                        <tfoot>
+                            <tr style="font-weight:bold;background:#f8f9fa;">
+                                <td colspan="2" class="text-right">주문 총합</td>
+                                <td>${totalSelling.toLocaleString()}원</td>
+                                <td>${totalDiscount.toLocaleString()}원</td>
+                                <td>${totalPayment.toLocaleString()}원</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            `;
         }
 
         function handleLogout() {
@@ -175,6 +330,66 @@
             })
             .catch(error => {
                 console.error('Error:', error);
+                alert(error.message);
+            });
+        }
+
+        // 주문 폼 제출 이벤트
+        document.addEventListener('DOMContentLoaded', function() {
+            const orderForm = document.getElementById('orderForm');
+            if (orderForm) {
+                orderForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    handleOrderSubmit();
+                });
+            }
+        });
+
+        function handleOrderSubmit() {
+            const token = localStorage.getItem('accessToken');
+            const orderProductLists = [];
+            const inputs = document.querySelectorAll('#orderProductInputs input[type="number"]');
+            let hasError = false;
+            inputs.forEach(input => {
+                const quantity = parseInt(input.value, 10);
+                const productId = parseInt(input.getAttribute('data-product-id'), 10);
+                const stock = parseInt(input.getAttribute('data-stock'), 10);
+                if (quantity > 0) {
+                    if (quantity > stock) {
+                        alert('주문 수량이 재고를 초과할 수 없습니다.');
+                        hasError = true;
+                        return;
+                    }
+                    orderProductLists.push({ productId, quantity });
+                }
+            });
+            if (hasError) return;
+            if (orderProductLists.length === 0) {
+                alert('주문할 상품과 수량을 선택하세요.');
+                return;
+            }
+            // 주문 전 요약 갱신(혹시 수량이 바뀌었을 수 있으니)
+            updateOrderSummary();
+            fetch('/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({ orderProductLists })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.message || '주문 생성에 실패했습니다.'); });
+                }
+                return response.json();
+            })
+            .then(result => {
+                alert('주문이 성공적으로 생성되었습니다!');
+                // 주문 후 수량 초기화 및 상품 목록 새로고침
+                fetchProducts();
+            })
+            .catch(error => {
                 alert(error.message);
             });
         }
