@@ -52,7 +52,7 @@ public class OrderRepository implements OrderWriteRepository, OrderReadRepositor
     }
 
     @Override
-    public List<Order> getOrdersByUserId(Long userId, boolean isDescending) {
+    public List<Order> findOrdersByUserId(Long userId, boolean isDescending) {
         List<OrderEntity> orderEntities = isDescending 
             ? orderJpaRepository.findAllByUserIdOrderByIdDesc(userId)
             : orderJpaRepository.findAllByUserIdOrderByIdAsc(userId);

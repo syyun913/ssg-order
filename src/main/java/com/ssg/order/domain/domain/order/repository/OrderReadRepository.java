@@ -5,5 +5,5 @@ import java.util.List;
 
 public interface OrderReadRepository {
     Order getOrderWithOrderProductsById(Long orderId, Long userId);
-    List<Order> getOrdersByUserId(Long userId, boolean isDescending);
+    List<Order> findOrdersByUserId(Long userId, boolean isDescending);
 }

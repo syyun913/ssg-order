@@ -116,7 +116,7 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public List<OrderResponse> getOrders(Long userId) {
-        List<Order> orders = orderUseCase.getOrdersByUserId(userId, true);
+        List<Order> orders = orderUseCase.findOrdersByUserId(userId, true);
         return orders.stream()
             .map(orderDtoMapper::toOrderResponse)
             .toList();
