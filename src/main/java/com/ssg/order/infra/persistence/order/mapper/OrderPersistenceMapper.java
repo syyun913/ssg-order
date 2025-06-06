@@ -6,6 +6,7 @@ import com.ssg.order.infra.persistence.order.entity.OrderEntity;
 import com.ssg.order.infra.persistence.order.entity.OrderProductEntity;
 import java.util.List;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
 @Component
 public class OrderPersistenceMapper {
@@ -27,6 +28,12 @@ public class OrderPersistenceMapper {
         if (orderEntity == null) {
             return null;
         }
+        List<OrderProduct> orderProducts = null;
+        if (!ObjectUtils.isEmpty(orderProductEntities)) {
+            orderProducts = orderProductEntities.stream()
+                    .map(this::toDomain)
+                    .toList();
+        }
         return Order.builder()
                 .id(orderEntity.getId())
                 .userId(orderEntity.getUserId())
@@ -36,9 +43,7 @@ public class OrderPersistenceMapper {
                 .discountAmount(orderEntity.getDiscountAmount())
                 .createdAt(orderEntity.getCreatedAt())
                 .updatedAt(orderEntity.getUpdatedAt())
-                .orderProducts(orderProductEntities.stream()
-                        .map(this::toDomain)
-                        .toList())
+                .orderProducts(orderProducts)
                 .build();
     }
 

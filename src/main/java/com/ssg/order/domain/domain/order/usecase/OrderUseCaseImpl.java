@@ -44,4 +44,9 @@ class OrderUseCaseImpl implements OrderUseCase {
     public Order getOrderWithOrderProducts(Long orderId, Long userId) {
         return orderReadRepository.getOrderWithOrderProductsById(orderId, userId);
     }
+
+    @Override
+    public List<Order> getOrdersByUserId(Long userId, boolean isDescending) {
+        return orderReadRepository.getOrdersByUserId(userId, isDescending);
+    }
 } 

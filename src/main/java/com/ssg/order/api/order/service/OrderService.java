@@ -6,6 +6,7 @@ import com.ssg.order.api.order.service.request.CreateOrderProductRequest;
 import com.ssg.order.api.order.service.request.CreateOrderRequest;
 import com.ssg.order.api.order.service.response.OrderCreateResponse;
 import com.ssg.order.api.order.service.response.OrderProductsGetResponse;
+import com.ssg.order.api.order.service.response.OrderResponse;
 import com.ssg.order.domain.common.annotation.exception.BusinessException;
 import com.ssg.order.domain.common.annotation.exception.code.BusinessErrorCode;
 import com.ssg.order.domain.common.util.CommonUtil;
@@ -111,6 +112,14 @@ public class OrderService {
 
         // 주문 상품 응답 변환
         return orderDtoMapper.toOrderProductsGetResponse(order, orderProductWithProducts);
+    }
+
+    @Transactional(readOnly = true)
+    public List<OrderResponse> getOrders(Long userId) {
+        List<Order> orders = orderUseCase.getOrdersByUserId(userId, true);
+        return orders.stream()
+            .map(orderDtoMapper::toOrderResponse)
+            .toList();
     }
 
     private void validateProductStock(

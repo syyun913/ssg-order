@@ -7,4 +7,5 @@ import java.util.List;
 public interface OrderUseCase {
     Order createOrder(Long userId, List<OrderProduct> orderProducts);
     Order getOrderWithOrderProducts(Long orderId, Long userId);
+    List<Order> getOrdersByUserId(Long userId, boolean isDescending);
 } 

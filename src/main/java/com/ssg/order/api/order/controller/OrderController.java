@@ -6,11 +6,13 @@ import com.ssg.order.api.order.service.OrderService;
 import com.ssg.order.api.order.service.request.CreateOrderRequest;
 import com.ssg.order.api.order.service.response.OrderCreateResponse;
 import com.ssg.order.api.order.service.response.OrderProductsGetResponse;
+import com.ssg.order.api.order.service.response.OrderResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -50,5 +52,17 @@ public class OrderController {
         OrderProductsGetResponse order = orderService.getOrderWithOrderProducts(orderId, loginUser.getId());
 
         return ResponseEntity.ok(CommonResponse.of("주문 상품을 성공적으로 조회하였습니다.", order));
+    }
+
+    @Operation(summary = "주문 목록 조회")
+    @Parameter(name = "Authorization", description = "인가를 위한 토큰", in = ParameterIn.HEADER, required = true)
+    @GetMapping
+    public ResponseEntity<CommonResponse<List<OrderResponse>>> getOrders(
+        @AuthenticationPrincipal LoginUser loginUser
+    ) {
+        List<OrderResponse> orders = orderService.getOrders(
+            loginUser.getId());
+
+        return ResponseEntity.ok(CommonResponse.of("주문을 성공적으로 조회하였습니다.", orders));
     }
 }

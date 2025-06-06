@@ -50,4 +50,15 @@ public class OrderRepository implements OrderWriteRepository, OrderReadRepositor
 
         return mapper.toDomain(orderEntity, productEntities);
     }
+
+    @Override
+    public List<Order> getOrdersByUserId(Long userId, boolean isDescending) {
+        List<OrderEntity> orderEntities = isDescending 
+            ? orderJpaRepository.findAllByUserIdOrderByIdDesc(userId)
+            : orderJpaRepository.findAllByUserIdOrderByIdAsc(userId);
+
+        return orderEntities.stream()
+            .map(orderEntity -> mapper.toDomain(orderEntity, null))
+            .toList();
+    }
 }
