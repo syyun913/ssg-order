@@ -61,10 +61,7 @@ class OrderRepositoryTest {
                 .orderProducts(new ArrayList<>(List.of(orderProduct)))
                 .build();
 
-        orderEntity = OrderEntity.builder()
-                .id(1L)
-                .userId(1L)
-                .build();
+        orderEntity = createOrderEntity(1L, 1L);
 
         orderProductEntity = OrderProductEntity.builder()
                 .id(1L)
@@ -163,5 +160,96 @@ class OrderRepositoryTest {
                     assertThat(businessException.getMessage()).isEqualTo("주문 상품을 조회할 수 없습니다.");
                 });
         }
+    }
+
+    @DisplayName("사용자 ID로 주문 목록 조회")
+    @Nested
+    class FindOrdersByUserIdTests {
+        @Test
+        @DisplayName("사용자 ID로 주문 목록 조회 성공 시 주문 목록이 리턴된다")
+        void findOrdersByUserId_Success() {
+            // given
+            Long userId = 1L;
+            OrderEntity orderEntity1 = createOrderEntity(1L, userId);
+            OrderEntity orderEntity2 = createOrderEntity(2L, userId);
+            List<OrderEntity> orderEntities = List.of(orderEntity1, orderEntity2);
+
+            Order order1 = Order.builder()
+                .id(1L)
+                .userId(userId)
+                .build();
+            Order order2 = Order.builder()
+                .id(2L)
+                .userId(userId)
+                .build();
+            List<Order> expectedOrders = List.of(order1, order2);
+
+            when(orderJpaRepository.findAllByUserIdOrderByIdDesc(userId)).thenReturn(orderEntities);
+            when(mapper.toDomain(orderEntity1, null)).thenReturn(order1);
+            when(mapper.toDomain(orderEntity2, null)).thenReturn(order2);
+
+            // when
+            List<Order> result = orderRepository.findOrdersByUserId(userId, true);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result).hasSize(2);
+            assertThat(result).isEqualTo(expectedOrders);
+        }
+
+        @Test
+        @DisplayName("사용자 ID로 주문 목록 조회 시 주문이 없으면 빈 배열이 리턴된다")
+        void findOrdersByUserId_WithNoOrders_ShouldReturnEmptyList() {
+            // given
+            Long userId = 1L;
+            when(orderJpaRepository.findAllByUserIdOrderByIdDesc(userId)).thenReturn(List.of());
+
+            // when
+            List<Order> result = orderRepository.findOrdersByUserId(userId, true);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result).isEmpty();
+        }
+
+        @Test
+        @DisplayName("사용자 ID로 주문 목록 조회 시 내림차순으로 정렬된 결과가 리턴된다")
+        void findOrdersByUserId_WithDescendingOrder_ShouldReturnSortedList() {
+            // given
+            Long userId = 1L;
+            OrderEntity orderEntity1 = createOrderEntity(1L, userId);
+            OrderEntity orderEntity2 = createOrderEntity(2L, userId);
+            List<OrderEntity> orderEntities = List.of(orderEntity2, orderEntity1);
+
+            Order order1 = Order.builder()
+                .id(1L)
+                .userId(userId)
+                .build();
+            Order order2 = Order.builder()
+                .id(2L)
+                .userId(userId)
+                .build();
+            List<Order> expectedOrders = List.of(order2, order1);
+
+            when(orderJpaRepository.findAllByUserIdOrderByIdDesc(userId)).thenReturn(orderEntities);
+            when(mapper.toDomain(orderEntity2, null)).thenReturn(order2);
+            when(mapper.toDomain(orderEntity1, null)).thenReturn(order1);
+
+            // when
+            List<Order> result = orderRepository.findOrdersByUserId(userId, true);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result).hasSize(2);
+            assertThat(result).isEqualTo(expectedOrders);
+            assertThat(result.get(0).getId()).isGreaterThan(result.get(1).getId());
+        }
+    }
+
+    private OrderEntity createOrderEntity(Long id, Long userId) {
+        return OrderEntity.builder()
+                .id(id)
+                .userId(userId)
+                .build();
     }
 } 

@@ -110,6 +110,66 @@ class OrderUseCaseImplTest {
         }
     }
 
+    @Nested
+    @DisplayName("사용자 ID로 주문 목록 조회")
+    class FindOrdersByUserId {
+        @Test
+        @DisplayName("사용자 ID로 주문 목록을 조회 시 주문 목록이 리턴된다")
+        void findOrdersByUserId_ShouldReturnOrderList() {
+            // given
+            Long userId = 1L;
+            Order order1 = createOrder(1L, userId, List.of(), 1000, 1200, 200);
+            Order order2 = createOrder(2L, userId, List.of(), 2000, 2500, 500);
+            List<Order> expectedOrders = List.of(order1, order2);
+
+            when(orderReadRepository.findOrdersByUserId(userId, true)).thenReturn(expectedOrders);
+
+            // when
+            List<Order> result = orderUseCase.findOrdersByUserId(userId, true);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result).hasSize(2);
+            assertThat(result).isEqualTo(expectedOrders);
+        }
+
+        @Test
+        @DisplayName("사용자 ID로 주문 목록 조회 시 주문이 없으면 빈 배열이 리턴된다")
+        void findOrdersByUserId_WithNoOrders_ShouldReturnEmptyList() {
+            // given
+            Long userId = 1L;
+            when(orderReadRepository.findOrdersByUserId(userId, true)).thenReturn(List.of());
+
+            // when
+            List<Order> result = orderUseCase.findOrdersByUserId(userId, true);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result).isEmpty();
+        }
+
+        @Test
+        @DisplayName("사용자 ID로 주문 목록 조회 시 내림차순을 true로 넘기면 내림차순으로 정렬된 결과가 리턴된다")
+        void findOrdersByUserId_WithAscendingOrder_ShouldReturnSortedList() {
+            // given
+            Long userId = 1L;
+            Order order1 = createOrder(1L, userId, List.of(), 1000, 1200, 200);
+            Order order2 = createOrder(2L, userId, List.of(), 2000, 2500, 500);
+            List<Order> expectedOrders = List.of(order2, order1);
+
+            when(orderReadRepository.findOrdersByUserId(userId, true)).thenReturn(expectedOrders);
+
+            // when
+            List<Order> result = orderUseCase.findOrdersByUserId(userId, true);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result).hasSize(2);
+            assertThat(result).isEqualTo(expectedOrders);
+            assertThat(result.get(0).getId()).isGreaterThan(result.get(1).getId());
+        }
+    }
+
     private Order createOrder(Long id, Long userId, List<OrderProduct> orderProducts, int paymentPrice, int sellingPrice, int discountAmount) {
         return Order.builder()
                     .id(id)

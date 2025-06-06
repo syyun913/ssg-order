@@ -12,6 +12,7 @@ import com.ssg.order.api.order.service.request.CreateOrderRequest;
 import com.ssg.order.api.order.service.response.OrderCreateResponse;
 import com.ssg.order.api.order.service.response.OrderProductsGetProductResponse;
 import com.ssg.order.api.order.service.response.OrderProductsGetResponse;
+import com.ssg.order.api.order.service.response.OrderResponse;
 import com.ssg.order.domain.common.annotation.exception.BusinessException;
 import com.ssg.order.domain.common.annotation.exception.code.BusinessErrorCode;
 import com.ssg.order.domain.domain.order.Order;
@@ -252,6 +253,51 @@ class OrderServiceTest {
         }
     }
 
+    @Nested
+    @DisplayName("주문 목록 조회")
+    class GetOrders {
+        @Test
+        @DisplayName("사용자 ID로 주문 목록 조회 시 주문 목록을 리턴한다")
+        void getOrders_ShouldReturnOrderList() {
+            // given
+            Long userId = 1L;
+            Order order1 = createOrder(1L, userId, List.of());
+            Order order2 = createOrder(2L, userId, List.of());
+            List<Order> orders = List.of(order1, order2);
+
+            OrderResponse response1 = createOrderResponse(1L);
+            OrderResponse response2 = createOrderResponse(2L);
+            List<OrderResponse> expectedResponses = List.of(response1, response2);
+
+            when(orderUseCase.findOrdersByUserId(userId, true)).thenReturn(orders);
+            when(orderDtoMapper.toOrderResponse(order1)).thenReturn(response1);
+            when(orderDtoMapper.toOrderResponse(order2)).thenReturn(response2);
+
+            // when
+            List<OrderResponse> result = orderService.getOrders(userId);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result).hasSize(2);
+            assertThat(result).isEqualTo(expectedResponses);
+        }
+
+        @Test
+        @DisplayName("사용자 ID로 주문 목록 조회 시 주문이 없으면 빈 배열이 리턴된다")
+        void getOrders_WithNoOrders_ShouldReturnEmptyList() {
+            // given
+            Long userId = 1L;
+            when(orderUseCase.findOrdersByUserId(userId, true)).thenReturn(List.of());
+
+            // when
+            List<OrderResponse> result = orderService.getOrders(userId);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result).isEmpty();
+        }
+    }
+
     private CreateOrderProductRequest createOrderProductRequest(Long productId, Integer quantity) {
         return CreateOrderProductRequest.builder()
             .productId(productId)
@@ -314,6 +360,12 @@ class OrderServiceTest {
             .discountAmount(discountAmount)
             .paymentPrice(paymentPrice)
             .build();
+    }
+
+    private OrderResponse createOrderResponse(Long orderId) {
+        return OrderResponse.builder()
+                            .orderId(orderId)
+                            .build();
     }
 
 }
