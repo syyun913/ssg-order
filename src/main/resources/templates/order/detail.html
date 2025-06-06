@@ -129,7 +129,7 @@
         <div class="row">
             <div class="col-md-12">
                 <h1 class="text-center mb-3">주문 상세</h1>
-                <span onclick="goToMain()" class="back-link">← 메인으로 돌아가기</span>
+                <span onclick="goToOrderList()" class="back-link">← 주문 목록으로 돌아가기</span>
 
                 <div id="orderDetails">
                     <!-- 주문 상세 정보가 여기에 동적으로 추가됩니다 -->
@@ -237,6 +237,10 @@
 
         function goToMain() {
             window.location.href = '/view/order/main-page';
+        }
+
+        function goToOrderList() {
+            window.location.href = '/view/order/list';
         }
     </script>
 </body>
