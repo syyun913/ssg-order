@@ -98,7 +98,10 @@
         <div class="row">
             <div class="col-md-12">
                 <h1 class="text-center mb-3">주문 관리 시스템</h1>
-                <span onclick="handleLogout()" class="logout-link">로그아웃</span>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <a href="/view/order/list" class="btn btn-outline-primary">주문 목록</a>
+                    <span onclick="handleLogout()" class="logout-link">로그아웃</span>
+                </div>
 
                 <!-- 상품 목록 섹션 -->
                 <div class="mt-4">
@@ -143,12 +146,13 @@
             })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('상품 목록 조회에 실패했습니다.');
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.message || '상품 목록 조회에 실패했습니다.');
+                    });
                 }
                 return response.json();
             })
             .then(result => {
-                // result가 배열이거나, {data: [...]} 구조 모두 지원
                 let products = Array.isArray(result) ? result : result.data;
                 displayProducts(products);
             })
@@ -320,13 +324,14 @@
                 }
             })
             .then(response => {
-                if (response.ok) {
-                    localStorage.removeItem('accessToken');
-                    localStorage.removeItem('refreshToken');
-                    window.location.href = '/view/users/login-page';
-                } else {
-                    throw new Error('로그아웃에 실패했습니다.');
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.message || '로그아웃에 실패했습니다.');
+                    });
                 }
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken');
+                window.location.href = '/view/users/login-page';
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -335,64 +340,53 @@
         }
 
         // 주문 폼 제출 이벤트
-        document.addEventListener('DOMContentLoaded', function() {
-            const orderForm = document.getElementById('orderForm');
-            if (orderForm) {
-                orderForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    handleOrderSubmit();
-                });
-            }
-        });
-
-        function handleOrderSubmit() {
+        document.getElementById('orderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
             const token = localStorage.getItem('accessToken');
-            const orderProductLists = [];
-            const inputs = document.querySelectorAll('#orderProductInputs input[type="number"]');
-            let hasError = false;
-            inputs.forEach(input => {
-                const quantity = parseInt(input.value, 10);
+            const orderProducts = [];
+            
+            document.querySelectorAll('.order-quantity-input').forEach(input => {
                 const productId = parseInt(input.getAttribute('data-product-id'), 10);
-                const stock = parseInt(input.getAttribute('data-stock'), 10);
+                const quantity = parseInt(input.value, 10);
                 if (quantity > 0) {
-                    if (quantity > stock) {
-                        alert('주문 수량이 재고를 초과할 수 없습니다.');
-                        hasError = true;
-                        return;
-                    }
-                    orderProductLists.push({ productId, quantity });
+                    orderProducts.push({
+                        productId: productId,
+                        quantity: quantity
+                    });
                 }
             });
-            if (hasError) return;
-            if (orderProductLists.length === 0) {
-                alert('주문할 상품과 수량을 선택하세요.');
+
+            if (orderProducts.length === 0) {
+                alert('주문할 상품을 선택해주세요.');
                 return;
             }
-            // 주문 전 요약 갱신(혹시 수량이 바뀌었을 수 있으니)
-            updateOrderSummary();
+
             fetch('/orders', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + token
                 },
-                body: JSON.stringify({ orderProductLists })
+                body: JSON.stringify({ orderProductLists: orderProducts })
             })
             .then(response => {
                 if (!response.ok) {
-                    return response.json().then(err => { throw new Error(err.message || '주문 생성에 실패했습니다.'); });
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.message || '주문 생성에 실패했습니다.');
+                    });
                 }
                 return response.json();
             })
             .then(result => {
-                alert('주문이 성공적으로 생성되었습니다!');
-                // 주문 후 수량 초기화 및 상품 목록 새로고침
-                fetchProducts();
+                alert('주문이 성공적으로 생성되었습니다.');
+                window.location.href = `/view/order/detail?orderId=${result.data.orderId}`;
             })
             .catch(error => {
+                console.error('Error:', error);
                 alert(error.message);
             });
-        }
+        });
     </script>
 </body>
 </html> 

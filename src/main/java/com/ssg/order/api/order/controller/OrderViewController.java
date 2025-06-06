@@ -11,4 +11,14 @@ public class OrderViewController {
     public String mainPage() {
         return "main";
     }
+
+    @GetMapping("/detail")
+    public String orderDetail() {
+        return "order/detail";
+    }
+
+    @GetMapping("/list")
+    public String orderList() {
+        return "order/list";
+    }
 }

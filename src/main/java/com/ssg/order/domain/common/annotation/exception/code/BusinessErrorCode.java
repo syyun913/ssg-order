@@ -31,6 +31,14 @@ public enum BusinessErrorCode {
     NOT_FOUND_PRODUCT(
         BAD_REQUEST,
         "상품을 조회할 수 없습니다."
+    ),
+    NOT_FOUND_ORDER(
+        BAD_REQUEST,
+        "주문 정보를 조회할 수 없습니다."
+    ),
+    NOT_FOUND_ORDER_PRODUCT(
+        BAD_REQUEST,
+        "주문 상품을 조회할 수 없습니다."
     )
     ;
 
