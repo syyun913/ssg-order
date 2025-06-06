@@ -7,6 +7,7 @@ import com.ssg.order.domain.domain.order.Order;
 import com.ssg.order.domain.domain.order.OrderProduct;
 import com.ssg.order.domain.domain.order.enumtype.OrderProductStatusCode;
 import com.ssg.order.domain.domain.order.enumtype.OrderStatusCode;
+import com.ssg.order.domain.domain.order.repository.OrderReadRepository;
 import com.ssg.order.domain.domain.order.repository.OrderWriteRepository;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +26,9 @@ class OrderUseCaseImplTest {
 
     @Mock
     private OrderWriteRepository orderWriteRepository;
+
+    @Mock
+    private OrderReadRepository orderReadRepository;
 
     @Nested
     @DisplayName("주문 생성")
@@ -71,6 +75,38 @@ class OrderUseCaseImplTest {
             assertThat(result.getPaymentPrice()).isEqualTo(500);
             assertThat(result.getSellingPrice()).isEqualTo(600);
             assertThat(result.getDiscountAmount()).isEqualTo(100);
+        }
+    }
+
+    @Nested
+    @DisplayName("주문(주문상품 포함) 조회")
+    class GetOrderWithOrderProducts {
+        @Test
+        @DisplayName("주문(주문상품 포함) 조회 시 주문과 주문상품을 조회한다")
+        void getOrderWithOrderProducts_ShouldReturnOrderWithProducts() {
+            // given
+            Long orderId = 1L;
+            Long userId = 1L;
+            OrderProduct op1 = createOrderProduct(1L, orderId, 1000, 1200, 200, 2);
+            OrderProduct op2 = createOrderProduct(2L, orderId, 2000, 2500, 500, 1);
+            List<OrderProduct> orderProducts = List.of(op1, op2);
+            Order expectedOrder = createOrder(orderId, userId, orderProducts, 3000, 3700, 700);
+            
+            when(orderReadRepository.getOrderWithOrderProductsById(orderId, userId))
+                .thenReturn(expectedOrder);
+
+            // when
+            Order result = orderUseCase.getOrderWithOrderProducts(orderId, userId);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result.getId()).isEqualTo(orderId);
+            assertThat(result.getUserId()).isEqualTo(userId);
+            assertThat(result.getOrderProducts()).hasSize(2);
+            assertThat(result.getOrderProducts()).containsExactlyInAnyOrder(op1, op2);
+            assertThat(result.getPaymentPrice()).isEqualTo(3000);
+            assertThat(result.getSellingPrice()).isEqualTo(3700);
+            assertThat(result.getDiscountAmount()).isEqualTo(700);
         }
     }
 

@@ -10,6 +10,8 @@ import com.ssg.order.api.order.mapper.OrderDtoMapper;
 import com.ssg.order.api.order.service.request.CreateOrderProductRequest;
 import com.ssg.order.api.order.service.request.CreateOrderRequest;
 import com.ssg.order.api.order.service.response.OrderCreateResponse;
+import com.ssg.order.api.order.service.response.OrderProductsGetProductResponse;
+import com.ssg.order.api.order.service.response.OrderProductsGetResponse;
 import com.ssg.order.domain.common.annotation.exception.BusinessException;
 import com.ssg.order.domain.common.annotation.exception.code.BusinessErrorCode;
 import com.ssg.order.domain.domain.order.Order;
@@ -144,6 +146,112 @@ class OrderServiceTest {
 
     }
 
+    @Nested
+    @DisplayName("주문(주문상품 포함) 조회")
+    class GetOrderWithOrderProducts {
+        @Test
+        @DisplayName("주문(주문상품 포함) 조회 시 주문과 주문상품 정보를 조회한다")
+        void getOrderWithOrderProducts_ShouldReturnOrderWithProducts() {
+            // given
+            Long orderId = 1L;
+            Long userId = 1L;
+            Long productId1 = 1L;
+            Long productId2 = 2L;
+
+            // 주문 상품 생성
+            OrderProduct op1 = createOrderProduct(1L, orderId, productId1, 1000, 1200, 200, 2);
+            OrderProduct op2 = createOrderProduct(2L, orderId, productId2, 2000, 2500, 500, 1);
+            List<OrderProduct> orderProducts = List.of(op1, op2);
+
+            // 주문 생성
+            Order order = createOrder(orderId, userId, orderProducts, 3000, 3700, 700);
+
+            // 상품 정보 생성
+            Product product1 = createProduct(productId1, "상품1", 600, 100, 10);
+            Product product2 = createProduct(productId2, "상품2", 2500, 500, 5);
+            List<Product> products = List.of(product1, product2);
+
+            // Mock 설정
+            when(orderUseCase.getOrderWithOrderProducts(orderId, userId)).thenReturn(order);
+            when(productUseCase.findProductsByProductIds(List.of(productId1, productId2))).thenReturn(products);
+
+            // OrderProductsGetResponse 생성
+            OrderProductsGetResponse expectedResponse = OrderProductsGetResponse.builder()
+                .orderId(orderId)
+                .paymentPrice(3000)
+                .sellingPrice(3700)
+                .discountAmount(700)
+                .orderProductLists(List.of(
+                    OrderProductsGetProductResponse.builder()
+                        .orderProductId(1L)
+                        .productId(productId1)
+                        .productName("상품1")
+                        .quantity(2)
+                        .paymentPrice(1000)
+                        .build(),
+                    OrderProductsGetProductResponse.builder()
+                        .orderProductId(2L)
+                        .productId(productId2)
+                        .productName("상품2")
+                        .quantity(1)
+                        .paymentPrice(2000)
+                        .build()
+                ))
+                .build();
+
+            when(orderDtoMapper.toOrderProductsGetResponse(any(), any())).thenReturn(expectedResponse);
+
+            // when
+            OrderProductsGetResponse result = orderService.getOrderWithOrderProducts(orderId, userId);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result.getOrderId()).isEqualTo(orderId);
+            assertThat(result.getOrderProductLists()).hasSize(2);
+            assertThat(result.getPaymentPrice()).isEqualTo(3000);
+            assertThat(result.getSellingPrice()).isEqualTo(3700);
+            assertThat(result.getDiscountAmount()).isEqualTo(700);
+
+            // 주문 상품 정보 검증
+            var orderProduct1 = result.getOrderProductLists().get(0);
+            assertThat(orderProduct1.getProductId()).isEqualTo(productId1);
+            assertThat(orderProduct1.getProductName()).isEqualTo("상품1");
+            assertThat(orderProduct1.getQuantity()).isEqualTo(2);
+            assertThat(orderProduct1.getPaymentPrice()).isEqualTo(1000);
+
+            var orderProduct2 = result.getOrderProductLists().get(1);
+            assertThat(orderProduct2.getProductId()).isEqualTo(productId2);
+            assertThat(orderProduct2.getProductName()).isEqualTo("상품2");
+            assertThat(orderProduct2.getQuantity()).isEqualTo(1);
+            assertThat(orderProduct2.getPaymentPrice()).isEqualTo(2000);
+        }
+
+        @Test
+        @DisplayName("주문(주문상품 포함) 조회 시 상품이 존재하지 않으면 예외가 발생한다")
+        void getOrderWithOrderProducts_WithNonExistentProduct_ShouldThrowException() {
+            // given
+            Long orderId = 1L;
+            Long userId = 1L;
+            Long productId = 1L;
+
+            // 주문 상품 생성
+            OrderProduct orderProduct = createOrderProduct(1L, orderId, productId, 1000, 1200, 200, 2);
+            List<OrderProduct> orderProducts = List.of(orderProduct);
+
+            // 주문 생성
+            Order order = createOrder(orderId, userId, orderProducts, 1000, 1200, 200);
+
+            // Mock 설정
+            when(orderUseCase.getOrderWithOrderProducts(orderId, userId)).thenReturn(order);
+            when(productUseCase.findProductsByProductIds(List.of(productId))).thenReturn(List.of());
+
+            // when & then
+            assertThatThrownBy(() -> orderService.getOrderWithOrderProducts(orderId, userId))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", BusinessErrorCode.NOT_FOUND_PRODUCT);
+        }
+    }
+
     private CreateOrderProductRequest createOrderProductRequest(Long productId, Integer quantity) {
         return CreateOrderProductRequest.builder()
             .productId(productId)
@@ -167,12 +275,35 @@ class OrderServiceTest {
             .build();
     }
 
+    private OrderProduct createOrderProduct(Long id, Long orderId, Long productId, Integer sellingPrice, Integer discountAmount, Integer paymentPrice, Integer quantity) {
+        return OrderProduct.builder()
+            .id(id)
+            .orderId(orderId)
+            .productId(productId)
+            .sellingPrice(sellingPrice)
+            .discountAmount(discountAmount)
+            .paymentPrice(paymentPrice)
+            .quantity(quantity)
+            .build();
+    }
+
     private Order createOrder(Long id, Long userId, List<OrderProduct> orderProducts) {
         return Order.builder()
             .id(id)
             .userId(userId)
             .orderProducts(orderProducts)
             .build();
+    }
+
+    private Order createOrder(Long id, Long userId, List<OrderProduct> orderProducts, int paymentPrice, int sellingPrice, int discountAmount) {
+        return Order.builder()
+                    .id(id)
+                    .userId(userId)
+                    .orderProducts(orderProducts)
+                    .paymentPrice(paymentPrice)
+                    .sellingPrice(sellingPrice)
+                    .discountAmount(discountAmount)
+                    .build();
     }
 
     private OrderProduct createOrderProduct(Long productId, Integer quantity, Integer sellingPrice, Integer discountAmount, Integer paymentPrice) {
