@@ -34,6 +34,8 @@ public class OrderPersistenceMapper {
                 .paymentPrice(orderEntity.getPaymentPrice())
                 .sellingPrice(orderEntity.getSellingPrice())
                 .discountAmount(orderEntity.getDiscountAmount())
+                .createdAt(orderEntity.getCreatedAt())
+                .updatedAt(orderEntity.getUpdatedAt())
                 .orderProducts(orderProductEntities.stream()
                         .map(this::toDomain)
                         .toList())

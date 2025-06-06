@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 import com.ssg.order.api.order.mapper.OrderDtoMapper;
 import com.ssg.order.api.order.service.request.CreateOrderProductRequest;
 import com.ssg.order.api.order.service.request.CreateOrderRequest;
-import com.ssg.order.api.order.service.response.CreateOrderResponse;
+import com.ssg.order.api.order.service.response.OrderCreateResponse;
 import com.ssg.order.domain.common.annotation.exception.BusinessException;
 import com.ssg.order.domain.common.annotation.exception.code.BusinessErrorCode;
 import com.ssg.order.domain.domain.order.Order;
@@ -58,9 +58,9 @@ class OrderServiceTest {
 
             Order order = createOrder(1L, userId, List.of(orderProduct));
 
-            CreateOrderResponse expectedResponse = CreateOrderResponse.builder()
-                .orderId(1L)
-                .build();
+            OrderCreateResponse expectedResponse = OrderCreateResponse.builder()
+                                                                      .orderId(1L)
+                                                                      .build();
 
             when(productUseCase.findProductsByProductIds(List.of(1L))).thenReturn(List.of(product));
             when(orderDtoMapper.toOrderProduct(any())).thenReturn(orderProduct);
@@ -68,7 +68,7 @@ class OrderServiceTest {
             when(orderDtoMapper.toCreateOrderResponse(order)).thenReturn(expectedResponse);
 
             // when
-            CreateOrderResponse result = orderService.createOrder(userId, request);
+            OrderCreateResponse result = orderService.createOrder(userId, request);
 
             // then
             assertThat(result).isEqualTo(expectedResponse);
@@ -123,9 +123,9 @@ class OrderServiceTest {
 
             Order order = createOrder(1L, userId, List.of(orderProduct));
 
-            CreateOrderResponse expectedResponse = CreateOrderResponse.builder()
-                .orderId(1L)
-                .build();
+            OrderCreateResponse expectedResponse = OrderCreateResponse.builder()
+                                                                      .orderId(1L)
+                                                                      .build();
 
             when(productUseCase.findProductsByProductIds(List.of(1L))).thenReturn(List.of(product));
             when(orderDtoMapper.toOrderProduct(any())).thenReturn(orderProduct);
@@ -133,7 +133,7 @@ class OrderServiceTest {
             when(orderDtoMapper.toCreateOrderResponse(order)).thenReturn(expectedResponse);
 
             // when
-            CreateOrderResponse result = orderService.createOrder(userId, request);
+            OrderCreateResponse result = orderService.createOrder(userId, request);
 
             // then
             assertThat(result).isEqualTo(expectedResponse);

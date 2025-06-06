@@ -1,9 +1,11 @@
 package com.ssg.order.api.order.service;
 
 import com.ssg.order.api.order.mapper.OrderDtoMapper;
+import com.ssg.order.api.order.service.model.OrderProductWithProduct;
 import com.ssg.order.api.order.service.request.CreateOrderProductRequest;
 import com.ssg.order.api.order.service.request.CreateOrderRequest;
-import com.ssg.order.api.order.service.response.CreateOrderResponse;
+import com.ssg.order.api.order.service.response.OrderCreateResponse;
+import com.ssg.order.api.order.service.response.OrderProductsGetResponse;
 import com.ssg.order.domain.common.annotation.exception.BusinessException;
 import com.ssg.order.domain.common.annotation.exception.code.BusinessErrorCode;
 import com.ssg.order.domain.common.util.CommonUtil;
@@ -26,7 +28,7 @@ public class OrderService {
     private final OrderDtoMapper orderDtoMapper;
 
     @Transactional
-    public CreateOrderResponse createOrder(Long userId, CreateOrderRequest request) {
+    public OrderCreateResponse createOrder(Long userId, CreateOrderRequest request) {
         List<CreateOrderProductRequest> orderProductRequests = request.getOrderProductLists();
 
         List<Long> productIds = CommonUtil.extractIds(
@@ -74,6 +76,41 @@ public class OrderService {
         Order order = orderUseCase.createOrder(userId, orderProducts);
 
         return orderDtoMapper.toCreateOrderResponse(order);
+    }
+
+    @Transactional(readOnly = true)
+    public OrderProductsGetResponse getOrderWithOrderProducts(Long orderId, Long userId) {
+        // 주문 상품 조회
+        Order order = orderUseCase.getOrderWithOrderProducts(orderId, userId);
+
+        List<OrderProduct> orderProducts = order.getOrderProducts();
+
+        List<Long> productIds = orderProducts
+            .stream()
+            .map(OrderProduct::getProductId)
+            .toList();
+
+        List<Product> products = productUseCase.findProductsByProductIds(productIds);
+
+        Map<Long, Product> productMap = CommonUtil.convertToMap(
+            products,
+            Product::getId
+        );
+
+        // 주문 상품에 상품 정보를 매핑
+        List<OrderProductWithProduct> orderProductWithProducts = orderProducts.stream()
+            .map(orderProduct -> {
+                Product product = productMap.get(orderProduct.getProductId());
+                if (product == null) {
+                    throw new BusinessException(BusinessErrorCode.NOT_FOUND_PRODUCT,
+                                                "productId: " + orderProduct.getProductId());
+                }
+                return OrderProductWithProduct.of(orderProduct, product);
+            })
+            .toList();
+
+        // 주문 상품 응답 변환
+        return orderDtoMapper.toOrderProductsGetResponse(order, orderProductWithProducts);
     }
 
     private void validateProductStock(

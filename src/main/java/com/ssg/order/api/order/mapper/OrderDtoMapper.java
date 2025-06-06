@@ -1,14 +1,17 @@
 package com.ssg.order.api.order.mapper;
 
+import com.ssg.order.api.order.service.model.OrderProductWithProduct;
 import com.ssg.order.api.order.service.request.CreateOrderProductRequest;
-import com.ssg.order.api.order.service.response.CreateOrderResponse;
-import com.ssg.order.api.order.service.response.OrderProductResponse;
+import com.ssg.order.api.order.service.response.OrderCreateProductResponse;
+import com.ssg.order.api.order.service.response.OrderCreateResponse;
+import com.ssg.order.api.order.service.response.OrderProductsGetProductResponse;
+import com.ssg.order.api.order.service.response.OrderProductsGetResponse;
+import com.ssg.order.api.order.service.response.OrderResponse;
 import com.ssg.order.domain.domain.order.Order;
 import com.ssg.order.domain.domain.order.OrderProduct;
 import com.ssg.order.domain.domain.order.enumtype.OrderProductStatusCode;
-import org.springframework.stereotype.Component;
-
 import java.util.List;
+import org.springframework.stereotype.Component;
 
 @Component
 public class OrderDtoMapper {
@@ -22,29 +25,65 @@ public class OrderDtoMapper {
                 .paymentPrice(request.getPaymentPrice())
                 .build();
     }
-    public CreateOrderResponse toCreateOrderResponse(Order order) {
-        return CreateOrderResponse.builder()
+    public OrderCreateResponse toCreateOrderResponse(Order order) {
+        return OrderCreateResponse.builder()
+                                  .orderId(order.getId())
+                                  .paymentPrice(order.getPaymentPrice())
+                                  .sellingPrice(order.getSellingPrice())
+                                  .discountAmount(order.getDiscountAmount())
+                                  .orderProductLists(toOrderCreateProductResponses(order.getOrderProducts()))
+                                  .build();
+    }
+
+    private List<OrderCreateProductResponse> toOrderCreateProductResponses(List<OrderProduct> orderProducts) {
+        return orderProducts.stream()
+                .map(this::toOrderCreateProductResponse)
+                .toList();
+    }
+
+    private OrderCreateProductResponse toOrderCreateProductResponse(OrderProduct orderProduct) {
+        return OrderCreateProductResponse.builder()
+                                         .orderProductId(orderProduct.getId())
+                                         .paymentPrice(orderProduct.getPaymentPrice())
+                                         .quantity(orderProduct.getQuantity())
+                                         .build();
+    }
+
+    private List<OrderProductsGetProductResponse> toOrderProductsGetProductResponses(List<OrderProductWithProduct> orderProducts) {
+        return orderProducts.stream()
+                            .map(this::toOrderProductsGetProductResponse)
+                            .toList();
+    }
+
+    private OrderProductsGetProductResponse toOrderProductsGetProductResponse(OrderProductWithProduct orderProduct) {
+        return OrderProductsGetProductResponse.builder()
+                                              .orderProductId(orderProduct.getOrderProductId()).productId(orderProduct.getProductId())
+                                              .productName(orderProduct.getProductName())
+                                              .paymentPrice(orderProduct.getPaymentPrice())
+                                              .quantity(orderProduct.getQuantity())
+                                              .build();
+    }
+
+    public OrderProductsGetResponse toOrderProductsGetResponse(Order order, List<OrderProductWithProduct> orderProductWithProducts) {
+        return OrderProductsGetResponse.builder()
                 .orderId(order.getId())
                 .paymentPrice(order.getPaymentPrice())
                 .sellingPrice(order.getSellingPrice())
                 .discountAmount(order.getDiscountAmount())
-                .orderProductLists(toOrderProductResponses(order.getOrderProducts()))
+                .orderProductLists(toOrderProductsGetProductResponses(orderProductWithProducts))
                 .build();
     }
 
-    private List<OrderProductResponse> toOrderProductResponses(List<OrderProduct> orderProducts) {
-        return orderProducts.stream()
-                .map(this::toOrderProductResponse)
-                .toList();
-    }
-
-    private OrderProductResponse toOrderProductResponse(OrderProduct orderProduct) {
-        return OrderProductResponse.builder()
-                .orderProductId(orderProduct.getId())
-                .paymentPrice(orderProduct.getPaymentPrice())
-                .sellingPrice(orderProduct.getSellingPrice())
-                .discountAmount(orderProduct.getDiscountAmount())
-                .quantity(orderProduct.getQuantity())
+    public OrderResponse toOrderResponse(Order order) {
+        return OrderResponse.builder()
+                .orderId(order.getId())
+                .userId(order.getUserId())
+                .status(order.getStatusCode())
+                .paymentPrice(order.getPaymentPrice())
+                .sellingPrice(order.getSellingPrice())
+                .discountAmount(order.getDiscountAmount())
+                .createdAt(order.getCreatedAt())
+                .updatedAt(order.getUpdatedAt())
                 .build();
     }
 } 

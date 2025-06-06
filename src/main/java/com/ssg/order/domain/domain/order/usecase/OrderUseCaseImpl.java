@@ -4,6 +4,7 @@ import com.ssg.order.domain.common.annotation.UseCase;
 import com.ssg.order.domain.domain.order.Order;
 import com.ssg.order.domain.domain.order.OrderProduct;
 import com.ssg.order.domain.domain.order.enumtype.OrderStatusCode;
+import com.ssg.order.domain.domain.order.repository.OrderReadRepository;
 import com.ssg.order.domain.domain.order.repository.OrderWriteRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 class OrderUseCaseImpl implements OrderUseCase {
     private final OrderWriteRepository orderWriteRepository;
+    private final OrderReadRepository orderReadRepository;
 
     @Override
     public Order createOrder(Long userId, List<OrderProduct> orderProducts) {
@@ -36,5 +38,10 @@ class OrderUseCaseImpl implements OrderUseCase {
         Order savedOrder = orderWriteRepository.saveOrder(order);
 
         return savedOrder;
+    }
+
+    @Override
+    public Order getOrderWithOrderProducts(Long orderId, Long userId) {
+        return orderReadRepository.getOrderWithOrderProductsById(orderId, userId);
     }
 } 
