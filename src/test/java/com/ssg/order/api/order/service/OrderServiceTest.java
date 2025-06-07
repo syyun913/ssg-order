@@ -5,11 +5,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.eq;
 
 import com.ssg.order.api.order.mapper.OrderDtoMapper;
 import com.ssg.order.api.order.service.request.CreateOrderProductRequest;
 import com.ssg.order.api.order.service.request.CreateOrderRequest;
 import com.ssg.order.api.order.service.response.OrderCreateResponse;
+import com.ssg.order.api.order.service.response.OrderProductCancelResponse;
 import com.ssg.order.api.order.service.response.OrderProductsGetProductResponse;
 import com.ssg.order.api.order.service.response.OrderProductsGetResponse;
 import com.ssg.order.api.order.service.response.OrderResponse;
@@ -75,7 +77,7 @@ class OrderServiceTest {
 
             // then
             assertThat(result).isEqualTo(expectedResponse);
-            verify(productUseCase).updateProductStock(1L, 2);
+            verify(productUseCase).updateProductStock(1L, 2, false);
         }
 
         @Test
@@ -228,7 +230,7 @@ class OrderServiceTest {
         }
 
         @Test
-        @DisplayName("주문(주문상품 포함) 조회 시 상품이 존재하지 않으면 예외가 발생한다")
+        @DisplayName("주문(주문상품 포함) 조회 시 상품이 존재하지 않으면 BusinessException이 리턴된다")
         void getOrderWithOrderProducts_WithNonExistentProduct_ShouldThrowException() {
             // given
             Long orderId = 1L;
@@ -295,6 +297,173 @@ class OrderServiceTest {
             // then
             assertThat(result).isNotNull();
             assertThat(result).isEmpty();
+        }
+    }
+
+    @Nested
+    @DisplayName("주문 상품 취소")
+    class CancelOrderProduct {
+        @Test
+        @DisplayName("주문 상품 취소 시 주문 상품 상태가 변경되고 주문 금액이 차감되며 상품 재고가 원복된다")
+        void cancelOrderProduct_ShouldSucceed() {
+            // given
+            Long orderId = 1L;
+            Long orderProductId = 1L;
+            Long userId = 1L;
+            Long productId = 1L;
+
+            // 취소될 주문 상품 생성
+            OrderProduct orderProduct = createOrderProduct(orderProductId, orderId, productId, 2000, 2500, 500, 2);
+            
+            // 취소 후 업데이트될 주문 생성
+            Order updatedOrder = createOrder(orderId, userId, List.of(), 1000, 1200, 200);
+            
+            // 상품 정보 생성
+            Product product = createProduct(productId, "Test Product", 1000, 100, 10);
+
+            // Mock 설정
+            when(orderUseCase.cancelOrderProduct(orderId, orderProductId, userId)).thenReturn(orderProduct);
+            when(orderUseCase.substractOrderPrice(
+                orderId,
+                userId,
+                orderProduct.getPaymentPrice(),
+                orderProduct.getSellingPrice(),
+                orderProduct.getDiscountAmount()
+            )).thenReturn(updatedOrder);
+            when(productUseCase.getProductById(productId)).thenReturn(product);
+
+            // OrderProductCancelResponse 생성
+            OrderProductCancelResponse expectedResponse = OrderProductCancelResponse.builder()
+                .orderId(orderId)
+                .paymentPrice(1000)
+                .sellingPrice(1200)
+                .discountAmount(200)
+                .build();
+
+            when(orderDtoMapper.toOrderProductCancelResponse(any(), any())).thenReturn(expectedResponse);
+
+            // when
+            OrderProductCancelResponse result = orderService.cancelOrderProduct(orderId, orderProductId, userId);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result).isEqualTo(expectedResponse);
+            
+            // 주문 상품 취소 및 주문 금액 차감 검증
+            verify(orderUseCase).cancelOrderProduct(orderId, orderProductId, userId);
+            verify(orderUseCase).substractOrderPrice(
+                orderId,
+                userId,
+                orderProduct.getPaymentPrice(),
+                orderProduct.getSellingPrice(),
+                orderProduct.getDiscountAmount()
+            );
+            
+            // 상품 재고 원복 검증
+            verify(productUseCase).updateProductStock(productId, orderProduct.getQuantity(), true);
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 주문 ID로 취소 요청 시 BusinessException이 발생한다")
+        void cancelOrderProduct_WithNonExistentOrder_ShouldThrowException() {
+            // given
+            Long orderId = 999L;
+            Long orderProductId = 1L;
+            Long userId = 1L;
+
+            when(orderUseCase.cancelOrderProduct(orderId, orderProductId, userId))
+                .thenThrow(new BusinessException(BusinessErrorCode.NOT_FOUND_ORDER));
+
+            // when & then
+            assertThatThrownBy(() -> orderService.cancelOrderProduct(orderId, orderProductId, userId))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", BusinessErrorCode.NOT_FOUND_ORDER);
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 주문 상품 ID로 취소 요청 시 BusinessException이 발생한다")
+        void cancelOrderProduct_WithNonExistentOrderProduct_ShouldThrowException() {
+            // given
+            Long orderId = 1L;
+            Long orderProductId = 999L;
+            Long userId = 1L;
+
+            when(orderUseCase.cancelOrderProduct(orderId, orderProductId, userId))
+                .thenThrow(new BusinessException(BusinessErrorCode.NOT_FOUND_ORDER_PRODUCT));
+
+            // when & then
+            assertThatThrownBy(() -> orderService.cancelOrderProduct(orderId, orderProductId, userId))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", BusinessErrorCode.NOT_FOUND_ORDER_PRODUCT);
+        }
+
+        @Test
+        @DisplayName("이미 취소된 주문 상품에 대한 재취소 요청 시 BusinessException이 발생한다")
+        void cancelOrderProduct_WithAlreadyCanceledProduct_ShouldThrowException() {
+            // given
+            Long orderId = 1L;
+            Long orderProductId = 1L;
+            Long userId = 1L;
+
+            when(orderUseCase.cancelOrderProduct(orderId, orderProductId, userId))
+                .thenThrow(new BusinessException(BusinessErrorCode.ALREADY_CANCELED_ORDER_PRODUCT));
+
+            // when & then
+            assertThatThrownBy(() -> orderService.cancelOrderProduct(orderId, orderProductId, userId))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", BusinessErrorCode.ALREADY_CANCELED_ORDER_PRODUCT);
+        }
+
+        @Test
+        @DisplayName("주문 상품 취소 시 해당 상품의 재고가 정확히 복구되어야 한다")
+        void cancelOrderProduct_ShouldRestoreProductStock() {
+            // given
+            Long orderId = 1L;
+            Long orderProductId = 1L;
+            Long userId = 1L;
+            Long productId = 1L;
+            Integer orderQuantity = 3;
+            Integer originalStock = 10;
+
+            // 취소될 주문 상품 생성
+            OrderProduct orderProduct = createOrderProduct(orderProductId, orderId, productId, 2000, 2500, 500, orderQuantity);
+            
+            // 취소 후 업데이트될 주문 생성
+            Order updatedOrder = createOrder(orderId, userId, List.of(), 1000, 1200, 200);
+            
+            // 상품 정보 생성 (재고 정보 포함)
+            Product product = createProduct(productId, "Test Product", 1000, 100, originalStock);
+
+            // Mock 설정
+            when(orderUseCase.cancelOrderProduct(orderId, orderProductId, userId)).thenReturn(orderProduct);
+            when(orderUseCase.substractOrderPrice(
+                orderId,
+                userId,
+                orderProduct.getPaymentPrice(),
+                orderProduct.getSellingPrice(),
+                orderProduct.getDiscountAmount()
+            )).thenReturn(updatedOrder);
+            when(productUseCase.getProductById(productId)).thenReturn(product);
+
+            OrderProductCancelResponse expectedResponse = OrderProductCancelResponse.builder()
+                .orderId(orderId)
+                .paymentPrice(1000)
+                .sellingPrice(1200)
+                .discountAmount(200)
+                .build();
+
+            when(orderDtoMapper.toOrderProductCancelResponse(any(), any())).thenReturn(expectedResponse);
+
+            // when
+            orderService.cancelOrderProduct(orderId, orderProductId, userId);
+
+            // then
+            // 재고 복구 검증
+            verify(productUseCase).updateProductStock(
+                eq(productId),    // 상품 ID가 일치하는지
+                eq(orderQuantity), // 취소된 수량만큼 재고가 복구되는지
+                eq(true)          // 재고 증가(true)로 호출되는지
+            );
         }
     }
 

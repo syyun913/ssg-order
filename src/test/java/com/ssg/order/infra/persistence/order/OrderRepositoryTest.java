@@ -9,12 +9,13 @@ import com.ssg.order.domain.common.annotation.exception.BusinessException;
 import com.ssg.order.domain.common.annotation.exception.code.BusinessErrorCode;
 import com.ssg.order.domain.domain.order.Order;
 import com.ssg.order.domain.domain.order.OrderProduct;
+import com.ssg.order.domain.domain.order.enumtype.OrderProductStatusCode;
+import com.ssg.order.domain.domain.order.enumtype.OrderStatusCode;
 import com.ssg.order.infra.persistence.order.entity.OrderEntity;
 import com.ssg.order.infra.persistence.order.entity.OrderProductEntity;
 import com.ssg.order.infra.persistence.order.mapper.OrderPersistenceMapper;
 import com.ssg.order.infra.persistence.order.repository.OrderJpaRepository;
 import com.ssg.order.infra.persistence.order.repository.OrderProductJpaRepository;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,37 +49,33 @@ class OrderRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        orderProduct = OrderProduct.builder()
-                .id(1L)
-                .orderId(1L)
-                .productId(100L)
-                .quantity(2)
-                .build();
-
-        order = Order.builder()
-                .id(1L)
-                .userId(1L)
-                .orderProducts(new ArrayList<>(List.of(orderProduct)))
-                .build();
-
+        orderProduct = createOrderProduct(1L, 1L, 100L, 2);
+        order = createOrder(1L, 1L);
         orderEntity = createOrderEntity(1L, 1L);
-
-        orderProductEntity = OrderProductEntity.builder()
-                .id(1L)
-                .order(orderEntity)
-                .productId(100L)
-                .quantity(2)
-                .build();
+        orderProductEntity = createOrderProductEntity(1L, 1L, 100L, 2);
     }
 
     @DisplayName("주문 저장")
     @Nested
     class SaveOrderTests {
-
         @Test
         @DisplayName("주문 저장 성공 시 저장된 주문 정보가 리턴된다")
         void saveOrder_Success() {
             // given
+            Long orderId = 1L;
+            Long userId = 1L;
+            Long productId = 100L;
+
+            OrderProduct orderProduct = createOrderProduct(1L, orderId, productId, 2);
+            Order order = Order.builder()
+                .id(orderId)
+                .userId(userId)
+                .orderProducts(List.of(orderProduct))
+                .build();
+
+            OrderEntity orderEntity = createOrderEntity(orderId, userId);
+            OrderProductEntity orderProductEntity = createOrderProductEntity(1L, orderId, productId, 2);
+
             when(mapper.toEntity(any(Order.class))).thenReturn(orderEntity);
             when(orderJpaRepository.save(any(OrderEntity.class))).thenReturn(orderEntity);
             when(mapper.toEntity(any(OrderProduct.class), any(OrderEntity.class))).thenReturn(orderProductEntity);
@@ -90,13 +87,13 @@ class OrderRepositoryTest {
 
             // then
             assertThat(savedOrder).isNotNull();
-            assertThat(savedOrder.getId()).isEqualTo(1L);
+            assertThat(savedOrder.getId()).isEqualTo(orderId);
             assertThat(savedOrder.getOrderProducts()).isNotNull();
             assertThat(savedOrder.getOrderProducts()).hasSize(1);
             
             OrderProduct savedOrderProduct = savedOrder.getOrderProducts().get(0);
             assertThat(savedOrderProduct.getId()).isEqualTo(1L);
-            assertThat(savedOrderProduct.getProductId()).isEqualTo(100L);
+            assertThat(savedOrderProduct.getProductId()).isEqualTo(productId);
             assertThat(savedOrderProduct.getQuantity()).isEqualTo(2);
         }
     }
@@ -109,16 +106,29 @@ class OrderRepositoryTest {
         @DisplayName("주문 ID와 사용자 ID로 주문 조회 성공 시 주문과 주문상품 정보가 리턴된다")
         void getOrderWithOrderProductsById_Success() {
             // given
-            when(orderJpaRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(orderEntity));
-            when(orderProductJpaRepository.findAllByOrder_Id(1L)).thenReturn(List.of(orderProductEntity));
-            when(mapper.toDomain(any(OrderEntity.class), any())).thenReturn(order);
+            Long orderId = 1L;
+            Long userId = 1L;
+            OrderEntity orderEntity = createOrderEntity(orderId, userId);
+            OrderProductEntity orderProductEntity = createOrderProductEntity(1L, orderId, 100L, 2);
+            List<OrderProductEntity> orderProductEntities = List.of(orderProductEntity);
+
+            OrderProduct orderProduct = createOrderProduct(1L, orderId, 100L, 2);
+            Order expectedOrder = Order.builder()
+                .id(orderId)
+                .userId(userId)
+                .orderProducts(List.of(orderProduct))
+                .build();
+
+            when(orderJpaRepository.findByIdAndUserId(orderId, userId)).thenReturn(Optional.of(orderEntity));
+            when(orderProductJpaRepository.findAllByOrderId(orderId)).thenReturn(orderProductEntities);
+            when(mapper.toDomain(orderEntity, orderProductEntities)).thenReturn(expectedOrder);
 
             // when
-            Order foundOrder = orderRepository.getOrderWithOrderProductsById(1L, 1L);
+            Order foundOrder = orderRepository.getOrderWithOrderProductsById(orderId, userId);
 
             // then
             assertThat(foundOrder).isNotNull();
-            assertThat(foundOrder.getId()).isEqualTo(1L);
+            assertThat(foundOrder.getId()).isEqualTo(orderId);
             assertThat(foundOrder.getOrderProducts()).isNotNull();
             assertThat(foundOrder.getOrderProducts()).hasSize(1);
             
@@ -129,7 +139,7 @@ class OrderRepositoryTest {
         }
 
         @Test
-        @DisplayName("주문 ID와 사용자 ID로 주문 조회 시 주문이 존재하지 않으면 예외가 리턴된다")
+        @DisplayName("주문 ID와 사용자 ID로 주문 조회 시 주문이 존재하지 않으면 BusinessException이 리턴된다")
         void getOrderWithOrderProductsById_NotFoundOrder_ThrowsException() {
             // given
             when(orderJpaRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.empty());
@@ -145,11 +155,11 @@ class OrderRepositoryTest {
         }
 
         @Test
-        @DisplayName("주문 ID와 사용자 ID로 주문 조회 시 주문상품이 존재하지 않으면 예외가 리턴된다")
+        @DisplayName("주문 ID와 사용자 ID로 주문 조회 시 주문상품이 존재하지 않으면 BusinessException이 리턴된다")
         void getOrderWithOrderProductsById_NoOrderProducts_ThrowsException() {
             // given
             when(orderJpaRepository.findByIdAndUserId(1L, 1L)).thenReturn(Optional.of(orderEntity));
-            when(orderProductJpaRepository.findAllByOrder_Id(1L)).thenReturn(List.of());
+            when(orderProductJpaRepository.findAllByOrderId(1L)).thenReturn(List.of());
 
             // when & then
             assertThatThrownBy(() -> orderRepository.getOrderWithOrderProductsById(1L, 1L))
@@ -157,7 +167,7 @@ class OrderRepositoryTest {
                 .satisfies(exception -> {
                     BusinessException businessException = (BusinessException) exception;
                     assertThat(businessException.getErrorCode()).isEqualTo(BusinessErrorCode.NOT_FOUND_ORDER_PRODUCT);
-                    assertThat(businessException.getMessage()).isEqualTo("주문 상품을 조회할 수 없습니다.");
+                    assertThat(businessException.getMessage()).isEqualTo("주문 상품을 찾을 수 없습니다.");
                 });
         }
     }
@@ -174,14 +184,8 @@ class OrderRepositoryTest {
             OrderEntity orderEntity2 = createOrderEntity(2L, userId);
             List<OrderEntity> orderEntities = List.of(orderEntity1, orderEntity2);
 
-            Order order1 = Order.builder()
-                .id(1L)
-                .userId(userId)
-                .build();
-            Order order2 = Order.builder()
-                .id(2L)
-                .userId(userId)
-                .build();
+            Order order1 = createOrder(1L, userId);
+            Order order2 = createOrder(2L, userId);
             List<Order> expectedOrders = List.of(order1, order2);
 
             when(orderJpaRepository.findAllByUserIdOrderByIdDesc(userId)).thenReturn(orderEntities);
@@ -221,14 +225,8 @@ class OrderRepositoryTest {
             OrderEntity orderEntity2 = createOrderEntity(2L, userId);
             List<OrderEntity> orderEntities = List.of(orderEntity2, orderEntity1);
 
-            Order order1 = Order.builder()
-                .id(1L)
-                .userId(userId)
-                .build();
-            Order order2 = Order.builder()
-                .id(2L)
-                .userId(userId)
-                .build();
+            Order order1 = createOrder(1L, userId);
+            Order order2 = createOrder(2L, userId);
             List<Order> expectedOrders = List.of(order2, order1);
 
             when(orderJpaRepository.findAllByUserIdOrderByIdDesc(userId)).thenReturn(orderEntities);
@@ -246,10 +244,226 @@ class OrderRepositoryTest {
         }
     }
 
+    @DisplayName("주문 상품 취소")
+    @Nested
+    class CancelOrderProductTests {
+        @Test
+        @DisplayName("주문 상품 취소 성공 시 취소된 주문 상품 정보가 리턴된다")
+        void cancelOrderProduct_Success() {
+            // given
+            Long orderId = 1L;
+            Long orderProductId = 1L;
+            Long userId = 1L;
+
+            OrderEntity orderEntity = createOrderEntity(orderId, userId);
+            OrderProductEntity orderProductEntity = createOrderProductEntity(orderProductId, orderId, 100L, 2);
+
+            OrderProduct expectedOrderProduct = OrderProduct.builder()
+                .id(orderProductId)
+                .orderId(orderId)
+                .productId(100L)
+                .statusCode(OrderProductStatusCode.CANCELED)
+                .quantity(2)
+                .build();
+
+            when(orderJpaRepository.findByIdAndUserId(orderId, userId)).thenReturn(Optional.of(orderEntity));
+            when(orderProductJpaRepository.findByIdAndOrderId(orderProductId, orderId)).thenReturn(Optional.of(orderProductEntity));
+            when(orderProductJpaRepository.existsByOrderIdAndStatusCodeNot(orderId, OrderProductStatusCode.CANCELED)).thenReturn(true);
+            when(orderProductJpaRepository.save(any(OrderProductEntity.class))).thenReturn(orderProductEntity);
+            when(mapper.toDomain(any(OrderProductEntity.class))).thenReturn(expectedOrderProduct);
+
+            // when
+            OrderProduct result = orderRepository.cancelOrderProduct(orderId, orderProductId, userId);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result.getId()).isEqualTo(orderProductId);
+            assertThat(result.getOrderId()).isEqualTo(orderId);
+            assertThat(result.getStatusCode()).isEqualTo(OrderProductStatusCode.CANCELED);
+        }
+
+        @Test
+        @DisplayName("주문 상품 취소 요청 시 이미 취소된 주문 상품을 취소하려고 하면 BusinessException이 리턴된다")
+        void cancelOrderProduct_AlreadyCanceled_ThrowsException() {
+            // given
+            Long orderId = 1L;
+            Long orderProductId = 1L;
+            Long userId = 1L;
+
+            OrderEntity orderEntity = createOrderEntity(orderId, userId);
+            OrderProductEntity orderProductEntity = OrderProductEntity.builder()
+                .id(orderProductId)
+                .order(orderEntity)
+                .productId(100L)
+                .statusCode(OrderProductStatusCode.CANCELED)
+                .quantity(2)
+                .build();
+
+            when(orderJpaRepository.findByIdAndUserId(orderId, userId)).thenReturn(Optional.of(orderEntity));
+            when(orderProductJpaRepository.findByIdAndOrderId(orderProductId, orderId)).thenReturn(Optional.of(orderProductEntity));
+
+            // when & then
+            assertThatThrownBy(() -> orderRepository.cancelOrderProduct(orderId, orderProductId, userId))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(exception -> {
+                    BusinessException businessException = (BusinessException) exception;
+                    assertThat(businessException.getErrorCode()).isEqualTo(BusinessErrorCode.ALREADY_CANCELED_ORDER_PRODUCT);
+                });
+        }
+
+        @Test
+        @DisplayName("주문 상품 취소 요청 시 모든 주문 상품이 취소되면 주문 상태도 취소로 변경된다")
+        void cancelOrderProduct_AllProductsCanceled_ChangesOrderStatus() {
+            // given
+            Long orderId = 1L;
+            Long orderProductId = 1L;
+            Long userId = 1L;
+
+            OrderEntity orderEntity = createOrderEntity(orderId, userId);
+            OrderProductEntity orderProductEntity = createOrderProductEntity(orderProductId, orderId, 100L, 2);
+
+            OrderProduct expectedOrderProduct = OrderProduct.builder()
+                .id(orderProductId)
+                .orderId(orderId)
+                .productId(100L)
+                .statusCode(OrderProductStatusCode.CANCELED)
+                .quantity(2)
+                .build();
+
+            when(orderJpaRepository.findByIdAndUserId(orderId, userId)).thenReturn(Optional.of(orderEntity));
+            when(orderProductJpaRepository.findByIdAndOrderId(orderProductId, orderId)).thenReturn(Optional.of(orderProductEntity));
+            when(orderProductJpaRepository.existsByOrderIdAndStatusCodeNot(orderId, OrderProductStatusCode.CANCELED)).thenReturn(false);
+            when(orderProductJpaRepository.save(any(OrderProductEntity.class))).thenReturn(orderProductEntity);
+            when(mapper.toDomain(any(OrderProductEntity.class))).thenReturn(expectedOrderProduct);
+
+            // when
+            OrderProduct result = orderRepository.cancelOrderProduct(orderId, orderProductId, userId);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result.getStatusCode()).isEqualTo(OrderProductStatusCode.CANCELED);
+            assertThat(orderEntity.getStatusCode()).isEqualTo(OrderStatusCode.CANCELED);
+        }
+    }
+
+    @DisplayName("주문 금액 차감")
+    @Nested
+    class SubstractOrderPriceTests {
+        @Test
+        @DisplayName("주문 금액 차감 성공 시 차감된 주문 정보가 리턴된다")
+        void substractOrderPrice_Success() {
+            // given
+            Long orderId = 1L;
+            Long userId = 1L;
+            Integer subtractPaymentPrice = 1000;
+            Integer subtractSellingPrice = 1200;
+            Integer subtractDiscountAmount = 200;
+
+            OrderEntity orderEntity = OrderEntity.builder()
+                .id(orderId)
+                .userId(userId)
+                .paymentPrice(3000)
+                .sellingPrice(3700)
+                .discountAmount(700)
+                .build();
+
+            Order expectedOrder = Order.builder()
+                .id(orderId)
+                .userId(userId)
+                .paymentPrice(2000)
+                .sellingPrice(2500)
+                .discountAmount(500)
+                .build();
+
+            when(orderJpaRepository.findByIdAndUserId(orderId, userId)).thenReturn(Optional.of(orderEntity));
+            when(orderJpaRepository.save(any(OrderEntity.class))).thenReturn(orderEntity);
+            when(mapper.toDomain(any(OrderEntity.class), any())).thenReturn(expectedOrder);
+
+            // when
+            Order result = orderRepository.substractOrderPrice(
+                orderId,
+                userId,
+                subtractPaymentPrice,
+                subtractSellingPrice,
+                subtractDiscountAmount
+            );
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result.getId()).isEqualTo(orderId);
+            assertThat(result.getUserId()).isEqualTo(userId);
+            assertThat(result.getPaymentPrice()).isEqualTo(2000); // 3000 - 1000
+            assertThat(result.getSellingPrice()).isEqualTo(2500); // 3700 - 1200
+            assertThat(result.getDiscountAmount()).isEqualTo(500); // 700 - 200
+        }
+
+        @Test
+        @DisplayName("주문 금액 차감 시 차감 금액이 기존 금액보다 크면 BusinessException이 리턴된다")
+        void substractOrderPrice_ExceedsOriginalAmount_ThrowsException() {
+            // given
+            Long orderId = 1L;
+            Long userId = 1L;
+            Integer subtractPaymentPrice = 4000; // 기존 금액보다 큰 금액
+            Integer subtractSellingPrice = 1200;
+            Integer subtractDiscountAmount = 200;
+
+            OrderEntity orderEntity = OrderEntity.builder()
+                .id(orderId)
+                .userId(userId)
+                .paymentPrice(3000)
+                .sellingPrice(3700)
+                .discountAmount(700)
+                .build();
+
+            when(orderJpaRepository.findByIdAndUserId(orderId, userId)).thenReturn(Optional.of(orderEntity));
+
+            // when & then
+            assertThatThrownBy(() -> orderRepository.substractOrderPrice(
+                orderId,
+                userId,
+                subtractPaymentPrice,
+                subtractSellingPrice,
+                subtractDiscountAmount
+            )).isInstanceOf(BusinessException.class)
+              .satisfies(exception -> {
+                  BusinessException businessException = (BusinessException) exception;
+                  assertThat(businessException.getErrorCode()).isEqualTo(BusinessErrorCode.ORDER_PRICE_CANNOT_BE_NEGATIVE);
+              });
+        }
+    }
+
     private OrderEntity createOrderEntity(Long id, Long userId) {
         return OrderEntity.builder()
                 .id(id)
                 .userId(userId)
                 .build();
+    }
+
+    private Order createOrder(Long id, Long userId) {
+        return Order.builder()
+                .id(id)
+                .userId(userId)
+                .orderProducts(List.of())
+                .build();
+    }
+
+    private OrderProductEntity createOrderProductEntity(Long id, Long orderId, Long productId, int quantity) {
+        return OrderProductEntity.builder()
+                .id(id)
+                .order(OrderEntity.builder().id(orderId).build())
+                .productId(productId)
+                .quantity(quantity)
+                .statusCode(OrderProductStatusCode.ORDER_COMPLETED)
+                .build();
+    }
+
+    private OrderProduct createOrderProduct(Long id, Long orderId, Long productId, int quantity) {
+        return OrderProduct.builder()
+                            .id(id)
+                            .orderId(orderId)
+                            .productId(productId)
+                            .quantity(quantity)
+                            .statusCode(OrderProductStatusCode.ORDER_COMPLETED)
+                            .build();
     }
 } 

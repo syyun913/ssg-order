@@ -138,20 +138,20 @@ class ProductRepositoryTest {
             when(productJpaRepository.findById(1L)).thenReturn(Optional.of(mockProductEntity));
 
             // when
-            productRepository.updateProductStock(1L, 5);
+            productRepository.updateProductStock(1L, 5, false);
 
             // then
             verify(mockProductEntity).decreaseStock(5);
         }
 
         @Test
-        @DisplayName("상품 재고 수정 시 존재하지 않는 상품이 요청되면 예외가 리턴된다")
+        @DisplayName("상품 재고 수정 시 존재하지 않는 상품이 요청되면 BusinessException이 리턴된다")
         void updateProductStock_NotFoundProduct_ThrowsException() {
             // given
             when(productJpaRepository.findById(999L)).thenReturn(Optional.empty());
 
             // when & then
-            assertThatThrownBy(() -> productRepository.updateProductStock(999L, 5))
+            assertThatThrownBy(() -> productRepository.updateProductStock(999L, 5, false))
                     .isInstanceOf(BusinessException.class)
                     .satisfies(exception -> {
                         BusinessException businessException = (BusinessException) exception;

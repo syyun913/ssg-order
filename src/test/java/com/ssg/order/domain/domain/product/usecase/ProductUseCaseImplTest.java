@@ -109,11 +109,11 @@ class ProductUseCaseImplTest {
             int decreaseQuantity = 5;
 
             // when
-            productUseCase.updateProductStock(productId, decreaseQuantity);
+            productUseCase.updateProductStock(productId, decreaseQuantity, false);
 
             // then
             org.mockito.Mockito.verify(productWriteRepository)
-                .updateProductStock(productId, decreaseQuantity);
+                .updateProductStock(productId, decreaseQuantity, false);
         }
     }
 
