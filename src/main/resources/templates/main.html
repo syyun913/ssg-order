@@ -135,6 +135,18 @@
             fetchProducts();
         });
 
+        function handleUnauthorizedResponse(response) {
+            return response.json().then(errorData => {
+                if (response.status === 401 && errorData.message === '사용자 인증에 실패했습니다.') {
+                    localStorage.removeItem('accessToken');
+                    localStorage.removeItem('refreshToken');
+                    window.location.href = '/view/users/login-page';
+                    throw new Error('인증이 만료되었습니다. 다시 로그인해주세요.');
+                }
+                throw new Error(errorData.message || '요청 처리에 실패했습니다.');
+            });
+        }
+
         function fetchProducts() {
             const token = localStorage.getItem('accessToken');
             
@@ -146,9 +158,7 @@
             })
             .then(response => {
                 if (!response.ok) {
-                    return response.json().then(errorData => {
-                        throw new Error(errorData.message || '상품 목록 조회에 실패했습니다.');
-                    });
+                    return handleUnauthorizedResponse(response);
                 }
                 return response.json();
             })
@@ -325,9 +335,7 @@
             })
             .then(response => {
                 if (!response.ok) {
-                    return response.json().then(errorData => {
-                        throw new Error(errorData.message || '로그아웃에 실패했습니다.');
-                    });
+                    return handleUnauthorizedResponse(response);
                 }
                 localStorage.removeItem('accessToken');
                 localStorage.removeItem('refreshToken');
@@ -372,9 +380,7 @@
             })
             .then(response => {
                 if (!response.ok) {
-                    return response.json().then(errorData => {
-                        throw new Error(errorData.message || '주문 생성에 실패했습니다.');
-                    });
+                    return handleUnauthorizedResponse(response);
                 }
                 return response.json();
             })
