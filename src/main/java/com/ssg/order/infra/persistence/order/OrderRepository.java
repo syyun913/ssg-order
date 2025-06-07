@@ -85,16 +85,16 @@ public class OrderRepository implements OrderWriteRepository, OrderReadRepositor
     }
 
     @Override
-    public Order substractOrderPrice(Long orderId,
+    public Order subtractOrderPrice(Long orderId,
                                     Long userId,
                                     Integer subtractPaymentPrice,
                                     Integer subtractSellingPrice,
                                     Integer subtractDiscountAmount) {
 
         OrderEntity orderEntity = getOrderByIdAndUserId(orderId, userId);
-        orderEntity.substractPaymentPrice(subtractPaymentPrice);
-        orderEntity.substractSellingPrice(subtractSellingPrice);
-        orderEntity.substractDiscountAmount(subtractDiscountAmount);
+        orderEntity.subtractPaymentPrice(subtractPaymentPrice);
+        orderEntity.subtractSellingPrice(subtractSellingPrice);
+        orderEntity.subtractDiscountAmount(subtractDiscountAmount);
 
         return mapper.toDomain(orderJpaRepository.save(orderEntity), null);
     }

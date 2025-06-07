@@ -57,26 +57,26 @@ public class OrderEntity extends BaseTimeEntity {
         this.discountAmount = discountAmount;
     }
 
-    public void substractPaymentPrice(Integer subtractPrice) {
+    public void subtractPaymentPrice(Integer subtractPrice) {
         if ((this.paymentPrice - subtractPrice) < 0) {
             throw new BusinessException(BusinessErrorCode.ORDER_PRICE_CANNOT_BE_NEGATIVE,
-                                        "orderId: " + this.id + ", substractPaymentPrice: " + subtractPrice);
+                                        "orderId: " + this.id + ", subtractPaymentPrice: " + subtractPrice);
         }
         this.paymentPrice -= subtractPrice;
     }
 
-    public void substractSellingPrice(Integer subtractPrice) {
+    public void subtractSellingPrice(Integer subtractPrice) {
         if ((this.sellingPrice - subtractPrice) < 0) {
             throw new BusinessException(BusinessErrorCode.ORDER_PRICE_CANNOT_BE_NEGATIVE,
-                                        "orderId: " + this.id + ", substractSellingPrice: " + subtractPrice);
+                                        "orderId: " + this.id + ", subtractSellingPrice: " + subtractPrice);
         }
         this.sellingPrice -= subtractPrice;
     }
 
-    public void substractDiscountAmount(Integer subtractAmount) {
+    public void subtractDiscountAmount(Integer subtractAmount) {
         if ((this.discountAmount - subtractAmount) < 0) {
             throw new BusinessException(BusinessErrorCode.ORDER_PRICE_CANNOT_BE_NEGATIVE,
-                                        "orderId: " + this.id + ", substractDiscountAmount: " + subtractAmount);
+                                        "orderId: " + this.id + ", subtractDiscountAmount: " + subtractAmount);
         }
         this.discountAmount -= subtractAmount;
     }

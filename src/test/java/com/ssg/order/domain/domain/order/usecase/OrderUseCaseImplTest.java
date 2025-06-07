@@ -199,10 +199,10 @@ class OrderUseCaseImplTest {
 
     @Nested
     @DisplayName("주문 금액 차감")
-    class SubstractOrderPrice {
+    class SubtractOrderPrice {
         @Test
         @DisplayName("주문 금액 차감 시 주문의 금액이 정상적으로 차감된다")
-        void substractOrderPrice_ShouldSubtractAmountsCorrectly() {
+        void subtractOrderPrice_ShouldSubtractAmountsCorrectly() {
             // given
             Long orderId = 1L;
             Long userId = 1L;
@@ -216,7 +216,7 @@ class OrderUseCaseImplTest {
             // 차감 후 예상되는 주문
             Order expectedOrder = createOrder(orderId, userId, List.of(), 2000, 2500, 500);
 
-            when(orderWriteRepository.substractOrderPrice(
+            when(orderWriteRepository.subtractOrderPrice(
                 orderId,
                 userId,
                 subtractPaymentPrice,
@@ -225,7 +225,7 @@ class OrderUseCaseImplTest {
             )).thenReturn(expectedOrder);
 
             // when
-            Order result = orderUseCase.substractOrderPrice(
+            Order result = orderUseCase.subtractOrderPrice(
                 orderId,
                 userId,
                 subtractPaymentPrice,
@@ -244,7 +244,7 @@ class OrderUseCaseImplTest {
 
         @Test
         @DisplayName("주문 금액 차감 시 모든 금액이 0이 되면 주문의 금액이 0이 된다")
-        void substractOrderPrice_WithFullAmount_ShouldResultInZeroAmounts() {
+        void subtractOrderPrice_WithFullAmount_ShouldResultInZeroAmounts() {
             // given
             Long orderId = 1L;
             Long userId = 1L;
@@ -258,7 +258,7 @@ class OrderUseCaseImplTest {
             // 차감 후 예상되는 주문
             Order expectedOrder = createOrder(orderId, userId, List.of(), 0, 0, 0);
 
-            when(orderWriteRepository.substractOrderPrice(
+            when(orderWriteRepository.subtractOrderPrice(
                 orderId,
                 userId,
                 subtractPaymentPrice,
@@ -267,7 +267,7 @@ class OrderUseCaseImplTest {
             )).thenReturn(expectedOrder);
 
             // when
-            Order result = orderUseCase.substractOrderPrice(
+            Order result = orderUseCase.subtractOrderPrice(
                 orderId,
                 userId,
                 subtractPaymentPrice,

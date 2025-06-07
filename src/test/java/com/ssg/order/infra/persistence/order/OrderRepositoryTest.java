@@ -348,10 +348,10 @@ class OrderRepositoryTest {
 
     @DisplayName("주문 금액 차감")
     @Nested
-    class SubstractOrderPriceTests {
+    class SubtractOrderPriceTests {
         @Test
         @DisplayName("주문 금액 차감 성공 시 차감된 주문 정보가 리턴된다")
-        void substractOrderPrice_Success() {
+        void subtractOrderPrice_Success() {
             // given
             Long orderId = 1L;
             Long userId = 1L;
@@ -380,7 +380,7 @@ class OrderRepositoryTest {
             when(mapper.toDomain(any(OrderEntity.class), any())).thenReturn(expectedOrder);
 
             // when
-            Order result = orderRepository.substractOrderPrice(
+            Order result = orderRepository.subtractOrderPrice(
                 orderId,
                 userId,
                 subtractPaymentPrice,
@@ -399,7 +399,7 @@ class OrderRepositoryTest {
 
         @Test
         @DisplayName("주문 금액 차감 시 차감 금액이 기존 금액보다 크면 BusinessException이 리턴된다")
-        void substractOrderPrice_ExceedsOriginalAmount_ThrowsException() {
+        void subtractOrderPrice_ExceedsOriginalAmount_ThrowsException() {
             // given
             Long orderId = 1L;
             Long userId = 1L;
@@ -418,7 +418,7 @@ class OrderRepositoryTest {
             when(orderJpaRepository.findByIdAndUserId(orderId, userId)).thenReturn(Optional.of(orderEntity));
 
             // when & then
-            assertThatThrownBy(() -> orderRepository.substractOrderPrice(
+            assertThatThrownBy(() -> orderRepository.subtractOrderPrice(
                 orderId,
                 userId,
                 subtractPaymentPrice,

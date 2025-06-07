@@ -9,5 +9,5 @@ public interface OrderUseCase {
     Order getOrderWithOrderProducts(Long orderId, Long userId);
     List<Order> findOrdersByUserId(Long userId, boolean isDescending);
     OrderProduct cancelOrderProduct(Long orderId, Long orderProductId, Long userId);
-    Order substractOrderPrice(Long orderId, Long userId, Integer subtractPaymentPrice, Integer subtractSellingPrice, Integer subtractDiscountAmount);
+    Order subtractOrderPrice(Long orderId, Long userId, Integer subtractPaymentPrice, Integer subtractSellingPrice, Integer subtractDiscountAmount);
 } 

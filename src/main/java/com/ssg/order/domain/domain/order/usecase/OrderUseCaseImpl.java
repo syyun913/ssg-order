@@ -56,11 +56,11 @@ class OrderUseCaseImpl implements OrderUseCase {
     }
 
     @Override
-    public Order substractOrderPrice(Long orderId,
+    public Order subtractOrderPrice(Long orderId,
                                   Long userId,
                                   Integer subtractPaymentPrice,
                                   Integer subtractSellingPrice,
                                   Integer subtractDiscountAmount) {
-        return orderWriteRepository.substractOrderPrice(orderId, userId, subtractPaymentPrice, subtractSellingPrice, subtractDiscountAmount);
+        return orderWriteRepository.subtractOrderPrice(orderId, userId, subtractPaymentPrice, subtractSellingPrice, subtractDiscountAmount);
     }
 } 

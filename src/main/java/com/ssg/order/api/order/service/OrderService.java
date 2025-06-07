@@ -133,7 +133,7 @@ public class OrderService {
         OrderProduct canceledOrderProduct = orderUseCase.cancelOrderProduct(orderId, orderProductId, userId);
 
         // 주문 금액 변경
-        Order updatedOrder = orderUseCase.substractOrderPrice(
+        Order updatedOrder = orderUseCase.subtractOrderPrice(
             orderId,
             userId,
             canceledOrderProduct.getPaymentPrice(),

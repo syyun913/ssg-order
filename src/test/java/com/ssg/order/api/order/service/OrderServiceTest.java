@@ -323,7 +323,7 @@ class OrderServiceTest {
 
             // Mock 설정
             when(orderUseCase.cancelOrderProduct(orderId, orderProductId, userId)).thenReturn(orderProduct);
-            when(orderUseCase.substractOrderPrice(
+            when(orderUseCase.subtractOrderPrice(
                 orderId,
                 userId,
                 orderProduct.getPaymentPrice(),
@@ -351,7 +351,7 @@ class OrderServiceTest {
             
             // 주문 상품 취소 및 주문 금액 차감 검증
             verify(orderUseCase).cancelOrderProduct(orderId, orderProductId, userId);
-            verify(orderUseCase).substractOrderPrice(
+            verify(orderUseCase).subtractOrderPrice(
                 orderId,
                 userId,
                 orderProduct.getPaymentPrice(),
@@ -436,7 +436,7 @@ class OrderServiceTest {
 
             // Mock 설정
             when(orderUseCase.cancelOrderProduct(orderId, orderProductId, userId)).thenReturn(orderProduct);
-            when(orderUseCase.substractOrderPrice(
+            when(orderUseCase.subtractOrderPrice(
                 orderId,
                 userId,
                 orderProduct.getPaymentPrice(),
