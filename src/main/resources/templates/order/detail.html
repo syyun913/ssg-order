@@ -65,7 +65,7 @@
         .product-card .card-body {
             padding: 0.8rem;
             display: flex;
-            align-items: center;
+            justify-content: space-between;
         }
         .product-card .product-info {
             flex: 1;
@@ -76,8 +76,7 @@
             font-weight: 500;
         }
         .product-card .quantity-price-info {
-            text-align: right;
-            min-width: 120px;
+            margin-bottom: 0.5rem;
         }
         .product-card .quantity-info {
             color: #6c757d;
@@ -96,6 +95,13 @@
             font-weight: bold;
             color: #28a745;
         }
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+        }
+        .status-completed { background-color: #E8F5E9; color: #2E7D32; }
+        .status-canceled { background-color: #FFEBEE; color: #C62828; }
         .order-summary {
             background-color: #f8f9fa;
             padding: 1.2rem;
@@ -121,6 +127,34 @@
         .order-summary .total-price h5 {
             border-bottom: none;
             margin-bottom: 0.3rem;
+        }
+        .cancel-btn {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            border: 1px solid #dee2e6;
+            padding: 0.3rem 0.8rem;
+            border-radius: 0.25rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .cancel-btn:hover {
+            background-color: #e9ecef;
+            color: #495057;
+            border-color: #ced4da;
+        }
+        .cancel-btn:disabled {
+            background-color: #f8f9fa;
+            color: #adb5bd;
+            border-color: #dee2e6;
+            cursor: not-allowed;
+        }
+        .product-card .action-area {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.5rem;
+            margin-left: 1rem;
         }
     </style>
 </head>
@@ -185,15 +219,41 @@
             const orderDetails = document.getElementById('orderDetails');
             
             const productsHtml = order.orderProductLists.map(product => {
+                const getStatusText = (status) => {
+                    const statusMap = {
+                        'ORDER_COMPLETED': '주문완료',
+                        'CANCELED': '취소됨'
+                    };
+                    return statusMap[status] || status;
+                };
+
+                const getStatusClass = (status) => {
+                    const statusClassMap = {
+                        'ORDER_COMPLETED': 'status-completed',
+                        'CANCELED': 'status-canceled'
+                    };
+                    return statusClassMap[status] || 'status-completed';
+                };
+
                 return `
                     <div class="card product-card">
                         <div class="card-body">
                             <div class="product-info">
                                 <h5 class="card-title">${product.productName}</h5>
+                                <div class="quantity-price-info">
+                                    <p class="quantity-info mb-2">수량: ${product.quantity}개</p>
+                                    <p class="price-info product-price mb-0">${product.paymentPrice?.toLocaleString() || 0}원</p>
+                                </div>
                             </div>
-                            <div class="quantity-price-info">
-                                <p class="quantity-info mb-2">수량: ${product.quantity}개</p>
-                                <p class="price-info product-price mb-0">${product.paymentPrice?.toLocaleString() || 0}원</p>
+                            <div class="action-area">
+                                <span class="status-badge ${getStatusClass(product.status)}">
+                                    ${getStatusText(product.status)}
+                                </span>
+                                <button class="cancel-btn" 
+                                        onclick="cancelOrderProduct('${order.orderId}', '${product.orderProductId}')"
+                                        ${product.status === 'CANCELED' ? 'disabled' : ''}>
+                                    ${product.status === 'CANCELED' ? '취소됨' : '취소하기'}
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -207,10 +267,6 @@
                         <div class="info-row">
                             <span class="info-label">주문 번호</span>
                             <span class="info-value">${order.orderId}</span>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-label">주문 상태</span>
-                            <span class="info-value">${order.orderStatus || '주문완료'}</span>
                         </div>
                         <div class="divider"></div>
                         <h5 class="card-title">주문 상품</h5>
@@ -241,6 +297,37 @@
 
         function goToOrderList() {
             window.location.href = '/view/order/list';
+        }
+
+        function cancelOrderProduct(orderId, orderProductId) {
+            if (!confirm('정말로 이 상품을 취소하시겠습니까?')) {
+                return;
+            }
+
+            const token = localStorage.getItem('accessToken');
+            
+            fetch(`/orders/${orderId}/products/${orderProductId}/cancellation`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.message || '상품 취소에 실패했습니다.');
+                    });
+                }
+                return response.json();
+            })
+            .then(result => {
+                alert('상품이 성공적으로 취소되었습니다.');
+                fetchOrderDetails(orderId); // 주문 상세 정보 새로고침
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert(error.message);
+            });
         }
     </script>
 </body>
