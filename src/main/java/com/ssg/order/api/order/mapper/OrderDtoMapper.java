@@ -4,6 +4,8 @@ import com.ssg.order.api.order.service.model.OrderProductWithProduct;
 import com.ssg.order.api.order.service.request.CreateOrderProductRequest;
 import com.ssg.order.api.order.service.response.OrderCreateProductResponse;
 import com.ssg.order.api.order.service.response.OrderCreateResponse;
+import com.ssg.order.api.order.service.response.OrderProductCancelProductResponse;
+import com.ssg.order.api.order.service.response.OrderProductCancelResponse;
 import com.ssg.order.api.order.service.response.OrderProductsGetProductResponse;
 import com.ssg.order.api.order.service.response.OrderProductsGetResponse;
 import com.ssg.order.api.order.service.response.OrderResponse;
@@ -49,6 +51,28 @@ public class OrderDtoMapper {
                                          .build();
     }
 
+    public OrderProductCancelResponse toOrderProductCancelResponse(Order order, OrderProductWithProduct orderProduct) {
+        return OrderProductCancelResponse.builder()
+                .orderId(order.getId())
+                .paymentPrice(order.getPaymentPrice())
+                .sellingPrice(order.getSellingPrice())
+                .discountAmount(order.getDiscountAmount())
+                .refundPrice(orderProduct.getPaymentPrice())
+                .orderProduct(toOrderProductCancelProductResponse(orderProduct))
+            .build();
+    }
+
+    public OrderProductCancelProductResponse toOrderProductCancelProductResponse(OrderProductWithProduct orderProduct) {
+        return OrderProductCancelProductResponse.builder()
+                .orderProductId(orderProduct.getOrderProductId())
+                .productId(orderProduct.getProductId())
+                .productName(orderProduct.getProductName())
+                .status(orderProduct.getStatus())
+                .paymentPrice(orderProduct.getPaymentPrice())
+                .quantity(orderProduct.getQuantity())
+                .build();
+    }
+
     private List<OrderProductsGetProductResponse> toOrderProductsGetProductResponses(List<OrderProductWithProduct> orderProducts) {
         return orderProducts.stream()
                             .map(this::toOrderProductsGetProductResponse)
@@ -57,11 +81,12 @@ public class OrderDtoMapper {
 
     private OrderProductsGetProductResponse toOrderProductsGetProductResponse(OrderProductWithProduct orderProduct) {
         return OrderProductsGetProductResponse.builder()
-                                              .orderProductId(orderProduct.getOrderProductId()).productId(orderProduct.getProductId())
-                                              .productName(orderProduct.getProductName())
-                                              .paymentPrice(orderProduct.getPaymentPrice())
-                                              .quantity(orderProduct.getQuantity())
-                                              .build();
+            .orderProductId(orderProduct.getOrderProductId()).productId(orderProduct.getProductId())
+            .productName(orderProduct.getProductName())
+            .status(orderProduct.getStatus())
+            .paymentPrice(orderProduct.getPaymentPrice())
+            .quantity(orderProduct.getQuantity())
+            .build();
     }
 
     public OrderProductsGetResponse toOrderProductsGetResponse(Order order, List<OrderProductWithProduct> orderProductWithProducts) {

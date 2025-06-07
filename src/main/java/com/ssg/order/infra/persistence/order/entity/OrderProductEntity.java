@@ -67,4 +67,8 @@ public class OrderProductEntity extends BaseTimeEntity {
         this.sellingPrice = sellingPrice;
         this.discountAmount = discountAmount;
     }
+
+    public void updateStatusCode(OrderProductStatusCode statusCode) {
+        this.statusCode = statusCode;
+    }
 }

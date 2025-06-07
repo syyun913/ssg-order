@@ -49,4 +49,18 @@ class OrderUseCaseImpl implements OrderUseCase {
     public List<Order> findOrdersByUserId(Long userId, boolean isDescending) {
         return orderReadRepository.findOrdersByUserId(userId, isDescending);
     }
+
+    @Override
+    public OrderProduct cancelOrderProduct(Long orderId, Long orderProductId, Long userId) {
+        return orderWriteRepository.cancelOrderProduct(orderId, orderProductId, userId);
+    }
+
+    @Override
+    public Order subtractOrderPrice(Long orderId,
+                                  Long userId,
+                                  Integer subtractPaymentPrice,
+                                  Integer subtractSellingPrice,
+                                  Integer subtractDiscountAmount) {
+        return orderWriteRepository.subtractOrderPrice(orderId, userId, subtractPaymentPrice, subtractSellingPrice, subtractDiscountAmount);
+    }
 } 

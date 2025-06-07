@@ -24,7 +24,12 @@ class ProductUseCaseImpl implements ProductUseCase {
     }
 
     @Override
-    public void updateProductStock(Long productId, int decreaseQuantity) {
-        productWriteRepository.updateProductStock(productId, decreaseQuantity);
+    public void updateProductStock(Long productId, int updateQuantity, boolean isIncrease) {
+        productWriteRepository.updateProductStock(productId, updateQuantity, isIncrease);
+    }
+
+    @Override
+    public Product getProductById(Long productId) {
+        return productReadRepository.getProductById(productId);
     }
 }

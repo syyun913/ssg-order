@@ -8,4 +8,6 @@ public interface OrderUseCase {
     Order createOrder(Long userId, List<OrderProduct> orderProducts);
     Order getOrderWithOrderProducts(Long orderId, Long userId);
     List<Order> findOrdersByUserId(Long userId, boolean isDescending);
+    OrderProduct cancelOrderProduct(Long orderId, Long orderProductId, Long userId);
+    Order subtractOrderPrice(Long orderId, Long userId, Integer subtractPaymentPrice, Integer subtractSellingPrice, Integer subtractDiscountAmount);
 } 

@@ -38,8 +38,8 @@ class OrderUseCaseImplTest {
         void createOrder_ShouldCalculateTotalsAndSaveOrder() {
             // given
             Long userId = 1L;
-            OrderProduct op1 = createOrderProduct(1L, 1L, 1000, 1200, 200, 2);
-            OrderProduct op2 = createOrderProduct(2L, 1L, 2000, 2500, 500, 1);
+            OrderProduct op1 = createOrderProduct(1L, 1L, OrderProductStatusCode.ORDER_COMPLETED, 1000, 1200, 200, 2);
+            OrderProduct op2 = createOrderProduct(2L, 1L, OrderProductStatusCode.ORDER_COMPLETED, 2000, 2500, 500, 1);
             List<OrderProduct> orderProducts = List.of(op1, op2);
             Order expectedOrder = createOrder(null, userId, orderProducts, 1000 + 2000, 1200 + 2500, 200 + 500);
             when(orderWriteRepository.saveOrder(org.mockito.Mockito.any(Order.class))).thenReturn(expectedOrder);
@@ -61,7 +61,7 @@ class OrderUseCaseImplTest {
         void createOrder_WithSingleProduct_ShouldReturnOrderWithProductValues() {
             // given
             Long userId = 3L;
-            OrderProduct op = createOrderProduct(3L, 2L, 500, 600, 100, 1);
+            OrderProduct op = createOrderProduct(3L, 2L, OrderProductStatusCode.ORDER_COMPLETED, 500, 600, 100, 1);
             List<OrderProduct> orderProducts = List.of(op);
             Order expectedOrder = createOrder(null, userId, orderProducts, 500, 600, 100);
             when(orderWriteRepository.saveOrder(org.mockito.Mockito.any(Order.class))).thenReturn(expectedOrder);
@@ -87,8 +87,8 @@ class OrderUseCaseImplTest {
             // given
             Long orderId = 1L;
             Long userId = 1L;
-            OrderProduct op1 = createOrderProduct(1L, orderId, 1000, 1200, 200, 2);
-            OrderProduct op2 = createOrderProduct(2L, orderId, 2000, 2500, 500, 1);
+            OrderProduct op1 = createOrderProduct(1L, orderId, OrderProductStatusCode.ORDER_COMPLETED, 1000, 1200, 200, 2);
+            OrderProduct op2 = createOrderProduct(2L, orderId, OrderProductStatusCode.ORDER_COMPLETED, 2000, 2500, 500, 1);
             List<OrderProduct> orderProducts = List.of(op1, op2);
             Order expectedOrder = createOrder(orderId, userId, orderProducts, 3000, 3700, 700);
             
@@ -170,6 +170,121 @@ class OrderUseCaseImplTest {
         }
     }
 
+    @Nested
+    @DisplayName("주문 상품 취소")
+    class CancelOrderProduct {
+        @Test
+        @DisplayName("주문 상품 취소 시 주문 상품의 상태가 취소로 변경된다")
+        void cancelOrderProduct_ShouldChangeStatusToCanceled() {
+            // given
+            Long orderId = 1L;
+            Long orderProductId = 1L;
+            Long userId = 1L;
+
+            OrderProduct orderProduct = createOrderProduct(orderProductId, orderId, OrderProductStatusCode.CANCELED, 1000, 1200, 200, 2);
+
+            when(orderWriteRepository.cancelOrderProduct(orderId, orderProductId, userId))
+                .thenReturn(orderProduct);
+
+            // when
+            OrderProduct result = orderUseCase.cancelOrderProduct(orderId, orderProductId, userId);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result.getId()).isEqualTo(orderProductId);
+            assertThat(result.getOrderId()).isEqualTo(orderId);
+            assertThat(result.getStatusCode()).isEqualTo(OrderProductStatusCode.CANCELED);
+        }
+    }
+
+    @Nested
+    @DisplayName("주문 금액 차감")
+    class SubtractOrderPrice {
+        @Test
+        @DisplayName("주문 금액 차감 시 주문의 금액이 정상적으로 차감된다")
+        void subtractOrderPrice_ShouldSubtractAmountsCorrectly() {
+            // given
+            Long orderId = 1L;
+            Long userId = 1L;
+            Integer subtractPaymentPrice = 1000;
+            Integer subtractSellingPrice = 1200;
+            Integer subtractDiscountAmount = 200;
+
+            // 기존 주문 생성
+            Order originalOrder = createOrder(orderId, userId, List.of(), 3000, 3700, 700);
+            
+            // 차감 후 예상되는 주문
+            Order expectedOrder = createOrder(orderId, userId, List.of(), 2000, 2500, 500);
+
+            when(orderWriteRepository.subtractOrderPrice(
+                orderId,
+                userId,
+                subtractPaymentPrice,
+                subtractSellingPrice,
+                subtractDiscountAmount
+            )).thenReturn(expectedOrder);
+
+            // when
+            Order result = orderUseCase.subtractOrderPrice(
+                orderId,
+                userId,
+                subtractPaymentPrice,
+                subtractSellingPrice,
+                subtractDiscountAmount
+            );
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result.getId()).isEqualTo(orderId);
+            assertThat(result.getUserId()).isEqualTo(userId);
+            assertThat(result.getPaymentPrice()).isEqualTo(2000); // 3000 - 1000
+            assertThat(result.getSellingPrice()).isEqualTo(2500); // 3700 - 1200
+            assertThat(result.getDiscountAmount()).isEqualTo(500); // 700 - 200
+        }
+
+        @Test
+        @DisplayName("주문 금액 차감 시 모든 금액이 0이 되면 주문의 금액이 0이 된다")
+        void subtractOrderPrice_WithFullAmount_ShouldResultInZeroAmounts() {
+            // given
+            Long orderId = 1L;
+            Long userId = 1L;
+            Integer subtractPaymentPrice = 3000;
+            Integer subtractSellingPrice = 3700;
+            Integer subtractDiscountAmount = 700;
+
+            // 기존 주문 생성
+            Order originalOrder = createOrder(orderId, userId, List.of(), 3000, 3700, 700);
+            
+            // 차감 후 예상되는 주문
+            Order expectedOrder = createOrder(orderId, userId, List.of(), 0, 0, 0);
+
+            when(orderWriteRepository.subtractOrderPrice(
+                orderId,
+                userId,
+                subtractPaymentPrice,
+                subtractSellingPrice,
+                subtractDiscountAmount
+            )).thenReturn(expectedOrder);
+
+            // when
+            Order result = orderUseCase.subtractOrderPrice(
+                orderId,
+                userId,
+                subtractPaymentPrice,
+                subtractSellingPrice,
+                subtractDiscountAmount
+            );
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result.getId()).isEqualTo(orderId);
+            assertThat(result.getUserId()).isEqualTo(userId);
+            assertThat(result.getPaymentPrice()).isZero();
+            assertThat(result.getSellingPrice()).isZero();
+            assertThat(result.getDiscountAmount()).isZero();
+        }
+    }
+
     private Order createOrder(Long id, Long userId, List<OrderProduct> orderProducts, int paymentPrice, int sellingPrice, int discountAmount) {
         return Order.builder()
                     .id(id)
@@ -182,12 +297,12 @@ class OrderUseCaseImplTest {
                     .build();
     }
 
-    private OrderProduct createOrderProduct(Long id, Long orderId, int paymentPrice, int sellingPrice, int discountAmount, int quantity) {
+    private OrderProduct createOrderProduct(Long id, Long orderId, OrderProductStatusCode statusCode, int paymentPrice, int sellingPrice, int discountAmount, int quantity) {
         return OrderProduct.builder()
                            .id(id)
                            .orderId(orderId)
                            .productId(id)
-                           .statusCode(OrderProductStatusCode.ORDER_COMPLETED)
+                           .statusCode(statusCode)
                            .quantity(quantity)
                            .paymentPrice(paymentPrice)
                            .sellingPrice(sellingPrice)

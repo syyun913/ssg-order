@@ -1,5 +1,7 @@
 package com.ssg.order.infra.persistence.order.entity;
 
+import com.ssg.order.domain.common.annotation.exception.BusinessException;
+import com.ssg.order.domain.common.annotation.exception.code.BusinessErrorCode;
 import com.ssg.order.domain.domain.order.enumtype.OrderStatusCode;
 import com.ssg.order.infra.persistence.common.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
@@ -53,5 +55,33 @@ public class OrderEntity extends BaseTimeEntity {
         this.paymentPrice = paymentPrice;
         this.sellingPrice = sellingPrice;
         this.discountAmount = discountAmount;
+    }
+
+    public void subtractPaymentPrice(Integer subtractPrice) {
+        if ((this.paymentPrice - subtractPrice) < 0) {
+            throw new BusinessException(BusinessErrorCode.ORDER_PRICE_CANNOT_BE_NEGATIVE,
+                                        "orderId: " + this.id + ", subtractPaymentPrice: " + subtractPrice);
+        }
+        this.paymentPrice -= subtractPrice;
+    }
+
+    public void subtractSellingPrice(Integer subtractPrice) {
+        if ((this.sellingPrice - subtractPrice) < 0) {
+            throw new BusinessException(BusinessErrorCode.ORDER_PRICE_CANNOT_BE_NEGATIVE,
+                                        "orderId: " + this.id + ", subtractSellingPrice: " + subtractPrice);
+        }
+        this.sellingPrice -= subtractPrice;
+    }
+
+    public void subtractDiscountAmount(Integer subtractAmount) {
+        if ((this.discountAmount - subtractAmount) < 0) {
+            throw new BusinessException(BusinessErrorCode.ORDER_PRICE_CANNOT_BE_NEGATIVE,
+                                        "orderId: " + this.id + ", subtractDiscountAmount: " + subtractAmount);
+        }
+        this.discountAmount -= subtractAmount;
+    }
+
+    public void updateStatusCode(OrderStatusCode statusCode) {
+        this.statusCode = statusCode;
     }
 }

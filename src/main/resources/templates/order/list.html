@@ -80,6 +80,18 @@
             return new Intl.NumberFormat('ko-KR').format(price) + '원';
         };
 
+        const handleUnauthorizedResponse = (response) => {
+            return response.json().then(errorData => {
+                if (response.status === 401 && errorData.message === '사용자 인증에 실패했습니다.') {
+                    localStorage.removeItem('accessToken');
+                    localStorage.removeItem('refreshToken');
+                    window.location.href = '/view/users/login-page';
+                    throw new Error('인증이 만료되었습니다. 다시 로그인해주세요.');
+                }
+                throw new Error(errorData.message || '요청 처리에 실패했습니다.');
+            });
+        };
+
         const createOrderCard = (order) => {
             return `
                 <div class="order-card bg-white rounded-lg shadow-md p-6 cursor-pointer" onclick="location.href='/view/order/detail?orderId=${order.orderId}'">
@@ -132,11 +144,7 @@
                 });
 
                 if (!response.ok) {
-                    if (response.status === 401) {
-                        window.location.href = '/view/users/login-page';
-                        return;
-                    }
-                    throw new Error('주문 목록을 불러오는데 실패했습니다.');
+                    return handleUnauthorizedResponse(response);
                 }
 
                 const data = await response.json();

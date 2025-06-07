@@ -1,6 +1,5 @@
 package com.ssg.order.api.order.service.response;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.ssg.order.domain.domain.order.enumtype.OrderStatusCode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
@@ -10,7 +9,6 @@ import lombok.Getter;
 @Schema(description = "주문 response")
 @Getter
 @Builder
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrderResponse {
     @Schema(description = "주문 ID")
     private Long orderId;

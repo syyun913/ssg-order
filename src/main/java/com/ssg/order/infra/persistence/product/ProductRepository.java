@@ -38,11 +38,24 @@ public class ProductRepository implements ProductReadRepository, ProductWriteRep
     }
 
     @Override
-    public void updateProductStock(Long productId, int decreaseQuantity) {
+    public Product getProductById(Long productId) {
+        return productJpaRepository.findById(productId)
+                .map(mapper::toDomain)
+                .orElseThrow(() -> new BusinessException(BusinessErrorCode.NOT_FOUND_PRODUCT,
+                                                               "productId: " + productId));
+    }
+
+    @Override
+    public void updateProductStock(Long productId, int updateQuantity, boolean isIncrease) {
         ProductEntity productEntity = productJpaRepository.findById(productId)
                 .orElseThrow(() -> new BusinessException(BusinessErrorCode.NOT_FOUND_PRODUCT,
                                                                "productId: " + productId));
-        productEntity.decreaseStock(decreaseQuantity);
+
+        if (isIncrease) {
+            productEntity.increaseStock(updateQuantity);
+        } else {
+            productEntity.decreaseStock(updateQuantity);
+        }
     }
 
 }
