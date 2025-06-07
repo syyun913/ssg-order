@@ -5,10 +5,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
 
-@Schema(description = "주문 상품 response")
+@Schema(description = "취소된 상품 response")
 @Getter
 @Builder
-public class OrderProductsGetProductResponse {
+public class OrderProductCancelProductResponse {
     @Schema(description = "주문상품 ID")
     private Long orderProductId;
 
@@ -17,11 +17,11 @@ public class OrderProductsGetProductResponse {
 
     @Schema(description = "상품명")
     private String productName;
-
+    
     @Schema(description = "주문 상품 상태")
     private OrderProductStatusCode status;
 
-    @Schema(description = "실구매가격")
+    @Schema(description = "환불금액")
     private Integer paymentPrice;
 
     @Schema(description = "주문 수량")

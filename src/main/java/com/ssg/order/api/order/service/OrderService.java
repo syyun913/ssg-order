@@ -5,6 +5,7 @@ import com.ssg.order.api.order.service.model.OrderProductWithProduct;
 import com.ssg.order.api.order.service.request.CreateOrderProductRequest;
 import com.ssg.order.api.order.service.request.CreateOrderRequest;
 import com.ssg.order.api.order.service.response.OrderCreateResponse;
+import com.ssg.order.api.order.service.response.OrderProductCancelResponse;
 import com.ssg.order.api.order.service.response.OrderProductsGetResponse;
 import com.ssg.order.api.order.service.response.OrderResponse;
 import com.ssg.order.domain.common.annotation.exception.BusinessException;
@@ -60,7 +61,7 @@ public class OrderService {
             );
 
             // 상품 재고 차감
-            productUseCase.updateProductStock(product.getId(), orderProduct.getQuantity());
+            productUseCase.updateProductStock(product.getId(), orderProduct.getQuantity(), false);
 
             // 주문 상품 가격 정보 세팅
             orderProduct.setSellingPrice(product.getSellingPrice() * orderProduct.getQuantity());
@@ -120,6 +121,35 @@ public class OrderService {
         return orders.stream()
             .map(orderDtoMapper::toOrderResponse)
             .toList();
+    }
+
+    @Transactional
+    public OrderProductCancelResponse cancelOrderProduct(
+        Long orderId,
+        Long orderProductId,
+        Long userId
+    ) {
+        // 주문상품 상태 변경 및 주문 금액 차감
+        OrderProduct canceledOrderProduct = orderUseCase.cancelOrderProduct(orderId, orderProductId, userId);
+
+        // 주문 금액 변경
+        Order updatedOrder = orderUseCase.substractOrderPrice(
+            orderId,
+            userId,
+            canceledOrderProduct.getPaymentPrice(),
+            canceledOrderProduct.getSellingPrice(),
+            canceledOrderProduct.getDiscountAmount()
+        );
+
+        // 상품 재고 원복
+        productUseCase.updateProductStock(canceledOrderProduct.getProductId(), canceledOrderProduct.getQuantity(), true);
+
+        OrderProductWithProduct orderProductWithProduct = OrderProductWithProduct.of(
+            canceledOrderProduct,
+            productUseCase.getProductById(canceledOrderProduct.getProductId())
+        );
+
+        return orderDtoMapper.toOrderProductCancelResponse(updatedOrder, orderProductWithProduct);
     }
 
     private void validateProductStock(

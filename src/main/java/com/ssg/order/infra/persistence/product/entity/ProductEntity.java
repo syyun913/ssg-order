@@ -48,10 +48,14 @@ public class ProductEntity extends BaseTimeEntity {
     }
 
     public void decreaseStock(int decreaseQuantity) {
-        if (stock < decreaseQuantity) {
+        if (this.stock < decreaseQuantity) {
             throw new BusinessException(BusinessErrorCode.OUT_OF_STOCK,
                                         "productId: " + this.id + ", productName: " + this.productName);
         }
         this.stock -= decreaseQuantity;
+    }
+
+    public void increaseStock(int increaseQuantity) {
+        this.stock += increaseQuantity;
     }
 }
