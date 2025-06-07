@@ -70,7 +70,7 @@ public class OrderController {
 
     @Operation(summary = "주문 상품 취소")
     @Parameter(name = "Authorization", description = "인가를 위한 토큰", in = ParameterIn.HEADER, required = true)
-    @PatchMapping ("/{order_id}/products/{order_product_id}/cancellation")
+    @PatchMapping("/{order_id}/products/{order_product_id}/cancellation")
     public ResponseEntity<CommonResponse<OrderProductCancelResponse>> cancelOrderProduct(
         @PathVariable("order_id") Long orderId,
         @PathVariable("order_product_id") Long orderProductId,
