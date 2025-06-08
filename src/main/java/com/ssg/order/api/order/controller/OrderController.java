@@ -1,5 +1,7 @@
 package com.ssg.order.api.order.controller;
 
+import static com.ssg.order.domain.common.annotation.constants.CommonConstants.ORDER_CREATE_PREFIX;
+
 import com.ssg.order.api.global.LoginUser;
 import com.ssg.order.api.global.common.response.CommonResponse;
 import com.ssg.order.api.order.service.OrderService;
@@ -8,6 +10,7 @@ import com.ssg.order.api.order.service.response.OrderCreateResponse;
 import com.ssg.order.api.order.service.response.OrderProductCancelResponse;
 import com.ssg.order.api.order.service.response.OrderProductsGetResponse;
 import com.ssg.order.api.order.service.response.OrderResponse;
+import com.ssg.order.domain.common.util.ExecutionLock;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -34,6 +37,7 @@ public class OrderController {
 
     @Operation(summary = "주문 생성 요청")
     @Parameter(name = "Authorization", description = "인가를 위한 토큰", in = ParameterIn.HEADER, required = true)
+    @ExecutionLock(keyPrefix = ORDER_CREATE_PREFIX, keyVariable = "#loginUser.username")
     @PostMapping
     public ResponseEntity<CommonResponse<OrderCreateResponse>> createOrder(
         @RequestBody @Valid CreateOrderRequest createOrderRequest,

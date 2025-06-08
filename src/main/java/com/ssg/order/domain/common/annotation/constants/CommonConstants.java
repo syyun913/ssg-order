@@ -5,4 +5,6 @@ public class CommonConstants {
 
     public static final String JWT_REFRESH_TOKEN_PREFIX = "jwt_refresh-token:";
     public static final String JWT_BLACKLIST_TOKEN_PREFIX = "jwt_blacklist-token:";
+
+    public static final String ORDER_CREATE_PREFIX = "order_create:";
 }

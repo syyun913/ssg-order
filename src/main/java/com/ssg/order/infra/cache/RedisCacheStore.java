@@ -91,6 +91,17 @@ public class RedisCacheStore implements CacheStore {
         }
     }
 
+    @Override
+    public boolean lock(String key, String value, Duration duration) {
+        return Boolean.TRUE.equals(
+            redisTemplate.opsForValue().setIfAbsent(
+                key,
+                value,
+                duration
+            )
+        );
+    }
+
     private String objectToString(Object value) {
         try {
             return objectMapper.writeValueAsString(value);
