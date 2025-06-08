@@ -26,7 +26,7 @@ import org.springframework.util.ObjectUtils;
 
 @Service
 @RequiredArgsConstructor
-public class UserSerivce {
+public class UserService {
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final UserDtoMapper userDtoMapper;

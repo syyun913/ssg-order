@@ -2,7 +2,7 @@ package com.ssg.order.api.user.controller;
 
 import com.ssg.order.api.user.service.response.LoginResponse;
 import com.ssg.order.api.global.common.response.CommonResponse;
-import com.ssg.order.api.user.service.UserSerivce;
+import com.ssg.order.api.user.service.UserService;
 import com.ssg.order.api.user.service.request.LoginRequest;
 import com.ssg.order.api.user.service.request.RegisterRequest;
 import com.ssg.order.api.user.service.request.ReissueRequest;
@@ -23,14 +23,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
-    private final UserSerivce userSerivce;
+    private final UserService userService;
 
     @Operation(summary = "사용자 로그인")
     @PostMapping("/login")
     public ResponseEntity<CommonResponse<LoginResponse>> login(
         @RequestBody @Valid LoginRequest request
     ) {
-        LoginResponse loginResponse = userSerivce.login(request);
+        LoginResponse loginResponse = userService.login(request);
 
         return ResponseEntity.ok(CommonResponse.of("로그인에 성공하였습니다.", loginResponse));
     }
@@ -40,7 +40,7 @@ public class UserController {
     public ResponseEntity<CommonResponse<?>> register(
         @RequestBody @Valid RegisterRequest request
     ) {
-        userSerivce.register(request);
+        userService.register(request);
         return ResponseEntity.ok(CommonResponse.of("회원가입에 성공하였습니다.", null));
     }
 
@@ -58,6 +58,6 @@ public class UserController {
     public ResponseEntity<CommonResponse<ReissueResponse>> reissue(
         @RequestBody @Valid ReissueRequest request
     ) {
-        return ResponseEntity.ok(CommonResponse.of(userSerivce.reissue(request.getRefreshToken())));
+        return ResponseEntity.ok(CommonResponse.of(userService.reissue(request.getRefreshToken())));
     }
 }
