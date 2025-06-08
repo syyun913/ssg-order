@@ -24,6 +24,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
+/**
+ * 사용자 도메인과 관련된 함수들이 정의됩니다.
+ */
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -39,6 +42,12 @@ public class UserService {
     @Value("${security.jwt.refresh-expiration-days}")
     private long refreshExpirationDays;
 
+    /**
+     * 로그인 요청을 처리하고, 인증된 사용자에 대한 액세스 토큰과 리프레시 토큰을 생성한다.
+     *
+     * @param loginRequest 사용자 로그인 요청 Request (사용자 로그인 ID 및 비밀번호)
+     * @return 로그인 응답 정보 (액세스 토큰 및 리프레시 토큰)
+     */
     @Transactional(readOnly = true)
     public LoginResponse login(LoginRequest loginRequest) {
         authenticationManager.authenticate(
@@ -62,6 +71,11 @@ public class UserService {
             .build();
     }
 
+    /**
+     * 사용자 등록 요청을 처리한다. 사용자가 존재하지 않는 경우에만 새 사용자를 저장한다.
+     *
+     * @param registerRequest 사용자 등록 요청 Request (사용자 로그인 ID 및 비밀번호)
+     */
     @Transactional
     public void register(RegisterRequest registerRequest) {
         registerRequest.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
