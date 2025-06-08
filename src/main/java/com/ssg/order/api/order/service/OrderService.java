@@ -21,6 +21,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -47,7 +48,7 @@ public class OrderService {
 
         for (CreateOrderProductRequest orderProduct : orderProductRequests) {
             Product product = productMap.get(orderProduct.getProductId());
-            if (product == null) {
+            if (ObjectUtils.isEmpty(product)) {
                 throw new BusinessException(BusinessErrorCode.NOT_FOUND_PRODUCT,
                                             "productId: " + orderProduct.getProductId());
             }
@@ -103,7 +104,7 @@ public class OrderService {
         List<OrderProductWithProduct> orderProductWithProducts = orderProducts.stream()
             .map(orderProduct -> {
                 Product product = productMap.get(orderProduct.getProductId());
-                if (product == null) {
+                if (ObjectUtils.isEmpty(product)) {
                     throw new BusinessException(BusinessErrorCode.NOT_FOUND_PRODUCT,
                                                 "productId: " + orderProduct.getProductId());
                 }

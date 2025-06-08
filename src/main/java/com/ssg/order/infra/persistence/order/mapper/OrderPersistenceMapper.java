@@ -11,7 +11,7 @@ import org.springframework.util.ObjectUtils;
 @Component
 public class OrderPersistenceMapper {
     public OrderEntity toEntity(Order order) {
-        if (order == null) {
+        if (ObjectUtils.isEmpty(order)) {
             return null;
         }
         return OrderEntity.builder()
@@ -25,7 +25,7 @@ public class OrderPersistenceMapper {
     }
 
     public Order toDomain(OrderEntity orderEntity, List<OrderProductEntity> orderProductEntities) {
-        if (orderEntity == null) {
+        if (ObjectUtils.isEmpty(orderEntity)) {
             return null;
         }
         List<OrderProduct> orderProducts = null;
@@ -48,7 +48,7 @@ public class OrderPersistenceMapper {
     }
 
     public OrderProductEntity toEntity(OrderProduct orderProduct, OrderEntity orderEntity) {
-        if (orderProduct == null) {
+        if (ObjectUtils.isEmpty(orderProduct)) {
             return null;
         }
         return OrderProductEntity.builder()
@@ -64,7 +64,7 @@ public class OrderPersistenceMapper {
     }
 
     public OrderProduct toDomain(OrderProductEntity orderProductEntity) {
-        if (orderProductEntity == null) {
+        if (ObjectUtils.isEmpty(orderProductEntity)) {
             return null;
         }
         return OrderProduct.builder()

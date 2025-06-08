@@ -3,11 +3,12 @@ package com.ssg.order.infra.persistence.user.mapper;
 import com.ssg.order.domain.domain.user.User;
 import com.ssg.order.infra.persistence.user.entity.UserEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
 @Component
 public class UserPersistenceMapper {
     public User toDomain(UserEntity userEntity) {
-        if (userEntity == null) {
+        if (ObjectUtils.isEmpty(userEntity)) {
             return null;
         }
         return User.builder()
@@ -18,7 +19,7 @@ public class UserPersistenceMapper {
     }
 
     public UserEntity toEntity(User user) {
-        if (user == null) {
+        if (ObjectUtils.isEmpty(user)) {
             return null;
         }
         return UserEntity.builder()
