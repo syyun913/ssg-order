@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Index;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,7 +25,9 @@ import org.hibernate.annotations.DynamicUpdate;
 @Entity
 @DynamicInsert
 @DynamicUpdate
-@Table(name = "ORDER_PRODUCT")
+@Table(name = "ORDER_PRODUCT", indexes = {
+    @Index(name = "idx-order_id", columnList = "order_id")
+})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OrderProductEntity extends BaseTimeEntity {
     @Id
