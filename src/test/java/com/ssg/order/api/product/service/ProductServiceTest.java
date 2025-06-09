@@ -1,6 +1,7 @@
 package com.ssg.order.api.product.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -50,8 +51,10 @@ class ProductServiceTest {
         List<ProductResponse> result = productService.findAllProducts();
 
         // then
-        assertThat(result).hasSize(2);
-        assertThat(result).isEqualTo(expectedResponses);
+        assertAll(
+            () -> assertThat(result).hasSize(2),
+            () -> assertThat(result).isEqualTo(expectedResponses)
+        );
         verify(productUseCase, times(1)).findAllProducts();
         verify(productDtoMapper, times(1)).toProductResponse(product1);
         verify(productDtoMapper, times(1)).toProductResponse(product2);

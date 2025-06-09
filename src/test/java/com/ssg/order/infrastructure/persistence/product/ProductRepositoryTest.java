@@ -165,6 +165,47 @@ class ProductRepositoryTest {
         }
     }
 
+    @DisplayName("상품 ID로 단일 상품 조회")
+    @Nested
+    class GetProductByIdTests {
+        @Test
+        @DisplayName("상품 ID로 단일 상품 조회 시 상품이 리턴된다")
+        void getProductById_Success() {
+            // given
+            when(productJpaRepository.findById(1L)).thenReturn(Optional.of(productEntity1));
+            when(mapper.toDomain(productEntity1)).thenReturn(product1);
+
+            // when
+            Product result = productRepository.getProductById(1L);
+
+            // then
+            assertThat(result).isNotNull();
+            assertThat(result.getId()).isEqualTo(1L);
+            assertThat(result.getProductName()).isEqualTo("Product1");
+            assertThat(result.getSellingPrice()).isEqualTo(1000);
+            assertThat(result.getDiscountAmount()).isEqualTo(100);
+            assertThat(result.getStock()).isEqualTo(10);
+        }
+
+        @Test
+        @DisplayName("상품 ID로 단일 상품 조회 시 존재하지 않는 상품이 요청되면 BusinessException이 리턴된다")
+        void getProductById_NotFoundProduct_ThrowsException() {
+            // given
+            when(productJpaRepository.findById(999L)).thenReturn(Optional.empty());
+
+            // when & then
+            assertThatThrownBy(() -> productRepository.getProductById(999L))
+                    .isInstanceOf(BusinessException.class)
+                    .satisfies(exception -> {
+                        BusinessException businessException = (BusinessException) exception;
+                        assertAll(
+                            () -> assertThat(businessException.getErrorCode()).isEqualTo(BusinessErrorCode.NOT_FOUND_PRODUCT),
+                            () -> assertThat(businessException.getMessage()).isEqualTo("상품을 조회할 수 없습니다.")
+                        );
+                    });
+        }
+    }
+
     private Product createProduct(Long id, String productName, int sellingPrice, int discountAmount, int stock) {
         return Product.builder()
                 .id(id)
