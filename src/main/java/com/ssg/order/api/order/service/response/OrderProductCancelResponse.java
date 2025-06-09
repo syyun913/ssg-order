@@ -15,7 +15,7 @@ public class OrderProductCancelResponse {
     @Schema(description = "잔여 실구매가격")
     private Integer paymentPrice;
 
-    @Schema(description = "잔여 구매가격")
+    @Schema(description = "잔여 매가격")
     private Integer sellingPrice;
 
     @Schema(description = "잔여 할인금액")
