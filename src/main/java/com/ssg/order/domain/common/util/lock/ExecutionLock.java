@@ -1,4 +1,4 @@
-package com.ssg.order.domain.common.util;
+package com.ssg.order.domain.common.util.lock;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

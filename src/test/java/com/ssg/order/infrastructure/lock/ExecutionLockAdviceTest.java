@@ -13,7 +13,7 @@ import static org.springframework.http.HttpStatus.CONFLICT;
 import com.ssg.order.domain.cache.CacheStore;
 import com.ssg.order.domain.common.annotation.exception.InternalServerException;
 import com.ssg.order.domain.common.annotation.exception.code.InternalErrorCode;
-import com.ssg.order.domain.common.util.ExecutionLock;
+import com.ssg.order.domain.common.util.lock.ExecutionLock;
 import java.time.Duration;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;

@@ -10,7 +10,7 @@ import com.ssg.order.api.order.service.response.OrderCreateResponse;
 import com.ssg.order.api.order.service.response.OrderProductCancelResponse;
 import com.ssg.order.api.order.service.response.OrderProductsGetResponse;
 import com.ssg.order.api.order.service.response.OrderResponse;
-import com.ssg.order.domain.common.util.ExecutionLock;
+import com.ssg.order.domain.common.util.lock.ExecutionLock;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
