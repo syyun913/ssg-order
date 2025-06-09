@@ -1,0 +1,46 @@
+spring:
+  datasource:
+    url: jdbc:h2:tcp://localhost/~/ssg
+    username: sa
+    password: ENC(fnKKrkrJ2TXc2u0ipRRQtgWDJLIvkiOI)
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        show_sql: false
+    defer-datasource-initialization: true
+
+  sql:
+    init:
+      mode: always
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+
+jasypt:
+  encryptor:
+    bean: jasyptEncryptorBean
+config:
+  encrypt:
+    password: /AI3dYykcfg/N4fEFnNnbt8CJ5u0h/9l
+    algorithm: PBEWithMD5AndDES
+    provider-name: SunJCE
+    pool-size: 1
+    key-obtention-iterations: 1000
+    string-output-type: base64
+
+security:
+  jwt:
+    key: ENC(eHVnadN0LJAARoxY1hvGX0Qd/Jbu7xKfisb73v4GEzC/2PKouJUOoO95RsWE8THY)
+    access-expiration-minutes: 30
+    refresh-expiration-days: 14
+
+logging:
+  level:
+    root: info

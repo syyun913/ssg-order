@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>메인 페이지</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-size: 14px;
+        }
+        h1 {
+            font-size: 1.2rem;
+            margin-bottom: 0.7rem;
+        }
+        h2 {
+            font-size: 1.05rem;
+            margin-bottom: 0.5rem;
+        }
+        h5 {
+            font-size: 0.95rem;
+        }
+        .section-title {
+            font-size: 1.05rem;
+            margin-bottom: 0.5rem;
+        }
+        .product-card {
+            transition: transform 0.2s;
+            min-height: unset;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .product-price {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #28a745;
+        }
+        .product-stock {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        .card-title {
+            font-size: 0.95rem;
+            margin-bottom: 0.3rem;
+        }
+        .btn {
+            font-size: 0.9rem;
+            padding: 0.375rem 0.75rem;
+        }
+        .card-body {
+            padding: 0.5rem 0.7rem;
+        }
+        .card {
+            min-height: unset;
+            margin-bottom: 0.5rem;
+        }
+        .form-group {
+            margin-bottom: 0.3rem;
+        }
+        .form-control {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.92rem;
+            height: 1.8rem;
+        }
+        .table th, .table td {
+            padding: 0.3rem 0.5rem;
+            font-size: 0.92rem;
+        }
+        .product-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.25rem;
+        }
+        .price-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .logout-link {
+            color: #6c757d;
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: block;
+            text-align: right;
+            margin-bottom: 1.5rem;
+        }
+        .logout-link:hover {
+            color: #495057;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-12">
+                <h1 class="text-center mb-3">주문 시스템</h1>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <a href="/view/order/list" class="btn btn-outline-primary">주문 목록</a>
+                    <span onclick="handleLogout()" class="logout-link">로그아웃</span>
+                </div>
+
+                <!-- 상품 목록 섹션 -->
+                <div class="mt-4">
+                    <h2 class="mb-3">주문 가능한 상품 목록</h2>
+                    <div id="productList" class="row">
+                        <!-- 상품 목록이 여기에 동적으로 추가됩니다 -->
+                    </div>
+                </div>
+                <!-- 주문 선택/생성 섹션 -->
+                <div class="mt-5">
+                    <h2 class="mb-3">주문할 상품 선택</h2>
+                    <form id="orderForm">
+                        <div id="orderProductInputs" class="row">
+                            <div id="orderProductEmptyMsg" class="col-12 text-center text-muted py-4">주문 상품을 선택해주세요</div>
+                        </div>
+                        <div id="orderSummary" class="mb-3"></div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary mt-3">주문하기</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // 페이지 로드 시 상품 목록 조회
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchProducts();
+        });
+
+        function handleUnauthorizedResponse(response) {
+            return response.json().then(errorData => {
+                if (response.status === 401 && errorData.message === '사용자 인증에 실패했습니다.') {
+                    localStorage.removeItem('accessToken');
+                    localStorage.removeItem('refreshToken');
+                    window.location.href = '/view/users/login-page';
+                    throw new Error('인증이 만료되었습니다. 다시 로그인해주세요.');
+                }
+                throw new Error(errorData.message || '요청 처리에 실패했습니다.');
+            });
+        }
+
+        function fetchProducts() {
+            const token = localStorage.getItem('accessToken');
+            
+            fetch('/products', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return handleUnauthorizedResponse(response);
+                }
+                return response.json();
+            })
+            .then(result => {
+                let products = Array.isArray(result) ? result : result.data;
+                displayProducts(products);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert(error.message);
+            });
+        }
+
+        function displayProducts(products) {
+            const productList = document.getElementById('productList');
+            productList.innerHTML = '';
+
+            // 주문 선택 영역 초기화
+            selectedProducts = {};
+            updateOrderProductInputs(products);
+
+            if (!products || products.length === 0) {
+                productList.innerHTML = '<div class="col-12 text-center text-muted py-4">주문 가능한 상품이 없습니다.</div>';
+                updateOrderProductInputs(products);
+                return;
+            }
+
+            products.forEach(product => {
+                const finalPrice = product.sellingPrice - product.discountAmount;
+                const disabled = product.stock === 0 ? 'disabled' : '';
+                const productCard = `
+                    <div class="col-md-4 mb-3">
+                        <div class="card product-card h-100">
+                            <div class="card-body">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input product-checkbox" type="checkbox" id="select-product-${product.id}" data-product-id="${product.id}" ${disabled}>
+                                    <label class="form-check-label" for="select-product-${product.id}">
+                                        <h5 class="card-title d-inline">${product.productName}</h5>
+                                    </label>
+                                </div>
+                                <div class="product-info">
+                                    <div class="price-info">
+                                        <span class="product-price">${finalPrice.toLocaleString()}원</span>
+                                        ${product.discountAmount > 0 ? 
+                                            `<small class="text-muted"><del>${product.sellingPrice.toLocaleString()}원</del></small>` 
+                                            : ''}
+                                    </div>
+                                    <span class="product-stock">재고: ${product.stock}개</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                productList.innerHTML += productCard;
+            });
+
+            // 체크박스 이벤트 바인딩
+            document.querySelectorAll('.product-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const productId = parseInt(this.getAttribute('data-product-id'), 10);
+                    if (this.checked) {
+                        selectedProducts[productId] = products.find(p => p.id === productId);
+                    } else {
+                        delete selectedProducts[productId];
+                    }
+                    updateOrderProductInputs(products);
+                });
+            });
+        }
+
+        // 선택된 상품을 저장할 객체
+        let selectedProducts = {};
+
+        function updateOrderProductInputs(products) {
+            const orderProductInputs = document.getElementById('orderProductInputs');
+            const orderSummary = document.getElementById('orderSummary');
+            const emptyMsg = document.getElementById('orderProductEmptyMsg');
+            orderProductInputs.innerHTML = '';
+            const selectedList = Object.values(selectedProducts);
+            if (selectedList.length === 0) {
+                orderProductInputs.innerHTML = '<div id="orderProductEmptyMsg" class="col-12 text-center text-muted py-4">주문 상품을 선택해주세요</div>';
+                if (orderSummary) orderSummary.innerHTML = '';
+                return;
+            }
+            selectedList.forEach(product => {
+                orderProductInputs.innerHTML += `
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">${product.productName}</h5>
+                                <div class="form-group">
+                                    <label for="quantity-${product.id}">수량 (재고: ${product.stock})</label>
+                                    <input type="number" class="form-control order-quantity-input" id="quantity-${product.id}" name="quantity-${product.id}" min="1" max="${product.stock}" value="1" data-product-id="${product.id}" data-stock="${product.stock}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            // 수량 입력 이벤트 바인딩 (동적 생성 input)
+            document.querySelectorAll('.order-quantity-input').forEach(input => {
+                input.addEventListener('input', function() {
+                    // 수량이 바뀌면 요약 갱신
+                    updateOrderSummary();
+                });
+            });
+            updateOrderSummary();
+        }
+
+        function updateOrderSummary() {
+            const orderSummary = document.getElementById('orderSummary');
+            const selectedList = Object.values(selectedProducts);
+            if (!orderSummary || selectedList.length === 0) {
+                if (orderSummary) orderSummary.innerHTML = '';
+                return;
+            }
+            let totalSelling = 0, totalDiscount = 0, totalPayment = 0;
+            let rows = '';
+            selectedList.forEach(product => {
+                const input = document.getElementById(`quantity-${product.id}`);
+                const quantity = input ? Math.max(1, Math.min(parseInt(input.value, 10) || 1, product.stock)) : 1;
+                const selling = product.sellingPrice * quantity;
+                const discount = product.discountAmount * quantity;
+                const payment = selling - discount;
+                totalSelling += selling;
+                totalDiscount += discount;
+                totalPayment += payment;
+                rows += `
+                    <tr>
+                        <td>${product.productName}</td>
+                        <td>${quantity}</td>
+                        <td>${selling.toLocaleString()}원</td>
+                        <td>${discount.toLocaleString()}원</td>
+                        <td>${payment.toLocaleString()}원</td>
+                    </tr>
+                `;
+            });
+            orderSummary.innerHTML = `
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered mb-2">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>상품명</th>
+                                <th>수량</th>
+                                <th>판매가 합계</th>
+                                <th>할인 합계</th>
+                                <th>결제금액</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rows}
+                        </tbody>
+                        <tfoot>
+                            <tr style="font-weight:bold;background:#f8f9fa;">
+                                <td colspan="2" class="text-right">주문 총합</td>
+                                <td>${totalSelling.toLocaleString()}원</td>
+                                <td>${totalDiscount.toLocaleString()}원</td>
+                                <td>${totalPayment.toLocaleString()}원</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            `;
+        }
+
+        function handleLogout() {
+            const token = localStorage.getItem('accessToken');
+            
+            fetch('/users/logout', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return handleUnauthorizedResponse(response);
+                }
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken');
+                window.location.href = '/view/users/login-page';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert(error.message);
+            });
+        }
+
+        // 주문 폼 제출 이벤트
+        document.getElementById('orderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const token = localStorage.getItem('accessToken');
+            const orderProducts = [];
+            
+            document.querySelectorAll('.order-quantity-input').forEach(input => {
+                const productId = parseInt(input.getAttribute('data-product-id'), 10);
+                const quantity = parseInt(input.value, 10);
+                if (quantity > 0) {
+                    orderProducts.push({
+                        productId: productId,
+                        quantity: quantity
+                    });
+                }
+            });
+
+            if (orderProducts.length === 0) {
+                alert('주문할 상품을 선택해주세요.');
+                return;
+            }
+
+            fetch('/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({ orderProductLists: orderProducts })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return handleUnauthorizedResponse(response);
+                }
+                return response.json();
+            })
+            .then(result => {
+                alert('주문이 성공적으로 생성되었습니다.');
+                window.location.href = `/view/order/detail?orderId=${result.data.orderId}`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert(error.message);
+            });
+        });
+    </script>
+</body>
+</html> 

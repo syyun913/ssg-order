@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>주문 상세</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-size: 14px;
+        }
+        h1 {
+            font-size: 1.2rem;
+            margin-bottom: 0.7rem;
+        }
+        .back-link {
+            color: #6c757d;
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: block;
+            text-align: left;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover {
+            color: #495057;
+            text-decoration: underline;
+        }
+        .order-info {
+            margin-bottom: 1.5rem;
+        }
+        .order-info .card-body {
+            padding: 1.2rem;
+        }
+        .order-info .card-title {
+            font-size: 1.1rem;
+            margin-bottom: 0.8rem;
+            font-weight: 500;
+        }
+        .order-info .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .order-info .info-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        .order-info .info-value {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        .order-info .divider {
+            height: 1px;
+            background-color: #dee2e6;
+            margin: 1rem 0;
+        }
+        .product-card {
+            margin-bottom: 0.5rem;
+            background-color: #f8f9fa;
+        }
+        .product-card:last-child {
+            margin-bottom: 0;
+        }
+        .product-card .card-body {
+            padding: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        .product-card .product-info {
+            flex: 1;
+        }
+        .product-card .card-title {
+            font-size: 1.1rem;
+            margin-bottom: 0;
+            font-weight: 500;
+        }
+        .product-card .quantity-price-info {
+            margin-bottom: 0.5rem;
+        }
+        .product-card .quantity-info {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+        .product-card .price-info {
+            font-size: 0.95rem;
+        }
+        .product-card p {
+            font-size: 0.85rem;
+            margin-bottom: 0.2rem;
+        }
+        .product-price {
+            font-size: 1em;
+            font-weight: bold;
+            color: #28a745;
+        }
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+        }
+        .status-completed { background-color: #E8F5E9; color: #2E7D32; }
+        .status-canceled { background-color: #FFEBEE; color: #C62828; }
+        .order-summary {
+            background-color: #f8f9fa;
+            padding: 1.2rem;
+            border-radius: 0.25rem;
+            margin-top: 1.5rem;
+        }
+        .order-summary h5 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .order-summary .price-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        .order-summary .total-price {
+            margin-top: 0.8rem;
+            padding-top: 0.8rem;
+            border-top: 1px solid #dee2e6;
+        }
+        .order-summary .total-price h5 {
+            border-bottom: none;
+            margin-bottom: 0.3rem;
+        }
+        .cancel-btn {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            border: 1px solid #dee2e6;
+            padding: 0.3rem 0.8rem;
+            border-radius: 0.25rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .cancel-btn:hover {
+            background-color: #e9ecef;
+            color: #495057;
+            border-color: #ced4da;
+        }
+        .cancel-btn:disabled {
+            background-color: #f8f9fa;
+            color: #adb5bd;
+            border-color: #dee2e6;
+            cursor: not-allowed;
+        }
+        .product-card .action-area {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.5rem;
+            margin-left: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-12">
+                <h1 class="text-center mb-3">주문 상세</h1>
+                <span onclick="goToOrderList()" class="back-link">← 주문 목록으로 돌아가기</span>
+
+                <div id="orderDetails">
+                    <!-- 주문 상세 정보가 여기에 동적으로 추가됩니다 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('orderId');
+            
+            if (orderId) {
+                fetchOrderDetails(orderId);
+            } else {
+                alert('주문 ID가 없습니다.');
+                goToMain();
+            }
+        });
+
+        function handleUnauthorizedResponse(response) {
+            return response.json().then(errorData => {
+                if (response.status === 401 && errorData.message === '사용자 인증에 실패했습니다.') {
+                    localStorage.removeItem('accessToken');
+                    localStorage.removeItem('refreshToken');
+                    window.location.href = '/view/users/login-page';
+                    throw new Error('인증이 만료되었습니다. 다시 로그인해주세요.');
+                }
+                throw new Error(errorData.message || '요청 처리에 실패했습니다.');
+            });
+        }
+
+        function fetchOrderDetails(orderId) {
+            const token = localStorage.getItem('accessToken');
+            
+            fetch(`/orders/${orderId}/products`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return handleUnauthorizedResponse(response);
+                }
+                return response.json();
+            })
+            .then(result => {
+                displayOrderDetails(result.data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert(error.message);
+                goToMain();
+            });
+        }
+
+        function displayOrderDetails(order) {
+            const orderDetails = document.getElementById('orderDetails');
+            
+            const productsHtml = order.orderProductLists.map(product => {
+                const getStatusText = (status) => {
+                    const statusMap = {
+                        'ORDER_COMPLETED': '주문완료',
+                        'CANCELED': '취소됨'
+                    };
+                    return statusMap[status] || status;
+                };
+
+                const getStatusClass = (status) => {
+                    const statusClassMap = {
+                        'ORDER_COMPLETED': 'status-completed',
+                        'CANCELED': 'status-canceled'
+                    };
+                    return statusClassMap[status] || 'status-completed';
+                };
+
+                return `
+                    <div class="card product-card">
+                        <div class="card-body">
+                            <div class="product-info">
+                                <h5 class="card-title">${product.productName}</h5>
+                                <div class="quantity-price-info">
+                                    <p class="quantity-info mb-2">수량: ${product.quantity}개</p>
+                                    <p class="price-info product-price mb-0">${product.paymentPrice?.toLocaleString() || 0}원</p>
+                                </div>
+                            </div>
+                            <div class="action-area">
+                                <span class="status-badge ${getStatusClass(product.status)}">
+                                    ${getStatusText(product.status)}
+                                </span>
+                                <button class="cancel-btn" 
+                                        onclick="cancelOrderProduct('${order.orderId}', '${product.orderProductId}')"
+                                        ${product.status === 'CANCELED' ? 'disabled' : ''}>
+                                    ${product.status === 'CANCELED' ? '취소됨' : '취소하기'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            orderDetails.innerHTML = `
+                <div class="card order-info">
+                    <div class="card-body">
+                        <h5 class="card-title">주문 정보</h5>
+                        <div class="info-row">
+                            <span class="info-label">주문 번호</span>
+                            <span class="info-value">${order.orderId}</span>
+                        </div>
+                        <div class="divider"></div>
+                        <h5 class="card-title">주문 상품</h5>
+                        ${productsHtml}
+                    </div>
+                </div>
+                <div class="order-summary">
+                    <h5>주문 금액 정보</h5>
+                    <div class="price-row">
+                        <span>판매가</span>
+                        <span>${order.sellingPrice?.toLocaleString() || 0}원</span>
+                    </div>
+                    <div class="price-row">
+                        <span>할인금액</span>
+                        <span>${order.discountAmount?.toLocaleString() || 0}원</span>
+                    </div>
+                    <div class="price-row total-price">
+                        <h5>실구매가</h5>
+                        <h5 class="product-price">${order.paymentPrice?.toLocaleString() || 0}원</h5>
+                    </div>
+                </div>
+            `;
+        }
+
+        function goToMain() {
+            window.location.href = '/view/order/main-page';
+        }
+
+        function goToOrderList() {
+            window.location.href = '/view/order/list';
+        }
+
+        function cancelOrderProduct(orderId, orderProductId) {
+            if (!confirm('정말로 이 상품을 취소하시겠습니까?')) {
+                return;
+            }
+
+            const token = localStorage.getItem('accessToken');
+            
+            fetch(`/orders/${orderId}/products/${orderProductId}/cancellation`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return handleUnauthorizedResponse(response);
+                }
+                return response.json();
+            })
+            .then(result => {
+                alert('상품이 성공적으로 취소되었습니다.');
+                fetchOrderDetails(orderId); // 주문 상세 정보 새로고침
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert(error.message);
+            });
+        }
+    </script>
+</body>
+</html> 
