@@ -7,7 +7,7 @@ import lombok.Getter;
 @Schema(description = "로그인 request")
 @Getter
 public class LoginRequest {
-    @Schema(description = "사용자 ID")
+    @Schema(description = "사용자 로그인 ID")
     @NotEmpty
     private String userName;
 

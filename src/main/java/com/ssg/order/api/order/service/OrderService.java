@@ -21,7 +21,11 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
+/**
+ * 주문 도메인과 관련된 함수들이 정의됩니다.
+ */
 @Service
 @RequiredArgsConstructor
 public class OrderService {
@@ -29,6 +33,13 @@ public class OrderService {
     private final ProductUseCase productUseCase;
     private final OrderDtoMapper orderDtoMapper;
 
+    /**
+     * 요청받은 상품 목록을 기반으로 재고를 차감한 뒤 주문을 생성한다.
+     *
+     * @param userId  사용자 ID
+     * @param request 주문 생성 Request
+     * @return 주문 생성된 주문의 정보
+     */
     @Transactional
     public OrderCreateResponse createOrder(Long userId, CreateOrderRequest request) {
         List<CreateOrderProductRequest> orderProductRequests = request.getOrderProductLists();
@@ -47,7 +58,7 @@ public class OrderService {
 
         for (CreateOrderProductRequest orderProduct : orderProductRequests) {
             Product product = productMap.get(orderProduct.getProductId());
-            if (product == null) {
+            if (ObjectUtils.isEmpty(product)) {
                 throw new BusinessException(BusinessErrorCode.NOT_FOUND_PRODUCT,
                                             "productId: " + orderProduct.getProductId());
             }
@@ -80,6 +91,13 @@ public class OrderService {
         return orderDtoMapper.toCreateOrderResponse(order);
     }
 
+    /**
+     * 주문의 상품 목록를 리턴한다
+     *
+     * @param orderId 주문 ID
+     * @param userId  사용자 ID
+     * @return 주문 금액과 주문 상품 목록
+     */
     @Transactional(readOnly = true)
     public OrderProductsGetResponse getOrderWithOrderProducts(Long orderId, Long userId) {
         // 주문 상품 조회
@@ -103,7 +121,7 @@ public class OrderService {
         List<OrderProductWithProduct> orderProductWithProducts = orderProducts.stream()
             .map(orderProduct -> {
                 Product product = productMap.get(orderProduct.getProductId());
-                if (product == null) {
+                if (ObjectUtils.isEmpty(product)) {
                     throw new BusinessException(BusinessErrorCode.NOT_FOUND_PRODUCT,
                                                 "productId: " + orderProduct.getProductId());
                 }
@@ -115,6 +133,12 @@ public class OrderService {
         return orderDtoMapper.toOrderProductsGetResponse(order, orderProductWithProducts);
     }
 
+    /**
+     * 주문 목록을 리턴한다.
+     *
+     * @param userId 사용자 ID
+     * @return 주문의 전체 정보를 포함한 목록
+     */
     @Transactional(readOnly = true)
     public List<OrderResponse> getOrders(Long userId) {
         List<Order> orders = orderUseCase.findOrdersByUserId(userId, true);
@@ -123,6 +147,14 @@ public class OrderService {
             .toList();
     }
 
+    /**
+     * 주문 상품을 취소하고, 주문 금액을 차감한 후, 취소된 주문 상품의 정보를 포함한 응답을 리턴한다.
+     *
+     * @param orderId        주문 ID
+     * @param orderProductId 주문 상품 ID
+     * @param userId         사용자 ID
+     * @return 취소된 주문 상품 정보와 주문 금액 정보
+     */
     @Transactional
     public OrderProductCancelResponse cancelOrderProduct(
         Long orderId,

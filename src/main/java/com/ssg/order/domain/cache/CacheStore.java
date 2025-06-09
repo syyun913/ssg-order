@@ -27,4 +27,10 @@ public interface CacheStore {
     boolean exists(String key);
 
     void delete(String key);
+
+    boolean lock(
+        String key,
+        String value,
+        Duration duration
+    );
 }

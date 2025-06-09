@@ -22,7 +22,7 @@ public class OrderResponse {
     @Schema(description = "실구매가격")
     private Integer paymentPrice;
 
-    @Schema(description = "구매가격")
+    @Schema(description = "판매가격")
     private Integer sellingPrice;
 
     @Schema(description = "할인금액")
