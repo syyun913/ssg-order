@@ -42,37 +42,37 @@ public class ModuleConventionRulesTest extends ArchUnitSupport {
             rule.check(IMPORTED_CLASSES);
         }
 
-        // domain -> api, infra: 의존 X
+        // domain -> api, infrastructure: 의존 X
         @Test
-        @DisplayName("domain 패키지는 api, infra 패키지에 의존하지 않아야 한다.")
+        @DisplayName("domain 패키지는 api, infrastructure 패키지에 의존하지 않아야 한다.")
         void checkDomainPackageDependency() {
             ArchRule rule = noClasses().that().resideInAPackage("..order.domain..")
                 .should().dependOnClassesThat()
                 .resideInAnyPackage(
                     "..order.api..",
-                    "..order.infra.."
+                    "..order.infrastructure.."
                 );
 
             rule.check(IMPORTED_CLASSES);
         }
 
-        // api -> infra: 의존 X
+        // api -> infrastructure: 의존 X
         @Test
-        @DisplayName("api 패키지는 infra 패키지에 의존하지 않아야 한다.")
+        @DisplayName("api 패키지는 infrastructure 패키지에 의존하지 않아야 한다.")
         void checkApiPackageDependency() {
             ArchRule rule = noClasses().that().resideInAPackage("..order.api..")
                 .should().dependOnClassesThat()
-                .resideInAPackage("..order.infra..");
+                .resideInAPackage("..order.infrastructure..");
 
             rule.check(IMPORTED_CLASSES);
         }
 
-        // infra -> api: 의존 X
+        // infrastructure -> api: 의존 X
         @Test
-        @DisplayName("infra 패키지는 api 패키지에 의존하지 않아야 한다.")
-        void checkinfraPackageDependency() {
+        @DisplayName("infrastructure 패키지는 api 패키지에 의존하지 않아야 한다.")
+        void checkinfrastructurePackageDependency() {
             ArchRule rule = noClasses().that()
-                .resideInAPackage("..order.infra..")
+                .resideInAPackage("..order.infrastructure..")
                 .should().dependOnClassesThat()
                 .resideInAPackage("..order.api..");
 
@@ -87,18 +87,18 @@ public class ModuleConventionRulesTest extends ArchUnitSupport {
             .consideringAllDependencies()
             .layer("api").definedBy("..order.api..")
             .layer("domain").definedBy("..order.domain..")
-            .layer("infra").definedBy("..order.infra..")
+            .layer("infrastructure").definedBy("..order.infrastructure..")
 
             .whereLayer("api").mayNotBeAccessedByAnyLayer()
             .whereLayer("domain").mayOnlyBeAccessedByLayers(
                 "api",
-                "infra"
+                "infrastructure"
             )
-            .whereLayer("infra").mayOnlyBeAccessedByLayers("domain")
+            .whereLayer("infrastructure").mayOnlyBeAccessedByLayers("domain")
 
             .because("api 모듈은 다른 모듈에서 접근하지 않아야 한다.")
-            .because("domain 모듈은 api, infra 모듈에서만 접근할 수 있다.")
-            .because("infra 모듈은 domain 모듈에서만 접근할 수 있다.");
+            .because("domain 모듈은 api, infrastructure 모듈에서만 접근할 수 있다.")
+            .because("infrastructure 모듈은 domain 모듈에서만 접근할 수 있다.");
 
         rule.check(IMPORTED_CLASSES);
     }
