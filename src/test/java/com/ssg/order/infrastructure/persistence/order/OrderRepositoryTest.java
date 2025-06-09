@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.ssg.order.domain.common.annotation.exception.BusinessException;
 import com.ssg.order.domain.common.annotation.exception.code.BusinessErrorCode;
@@ -27,6 +28,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+@DisplayName("주문 레포지토리 테스트")
 @ExtendWith(MockitoExtension.class)
 class OrderRepositoryTest {
 
@@ -149,8 +151,10 @@ class OrderRepositoryTest {
                 .isInstanceOf(BusinessException.class)
                 .satisfies(exception -> {
                     BusinessException businessException = (BusinessException) exception;
-                    assertThat(businessException.getErrorCode()).isEqualTo(BusinessErrorCode.NOT_FOUND_ORDER);
-                    assertThat(businessException.getMessage()).isEqualTo("주문 정보를 조회할 수 없습니다.");
+                    assertAll(
+                        () -> assertThat(businessException.getErrorCode()).isEqualTo(BusinessErrorCode.NOT_FOUND_ORDER),
+                        () -> assertThat(businessException.getMessage()).isEqualTo("주문 정보를 조회할 수 없습니다.")
+                    );
                 });
         }
 
@@ -166,8 +170,10 @@ class OrderRepositoryTest {
                 .isInstanceOf(BusinessException.class)
                 .satisfies(exception -> {
                     BusinessException businessException = (BusinessException) exception;
-                    assertThat(businessException.getErrorCode()).isEqualTo(BusinessErrorCode.NOT_FOUND_ORDER_PRODUCT);
-                    assertThat(businessException.getMessage()).isEqualTo("주문 상품을 찾을 수 없습니다.");
+                    assertAll(
+                        () -> assertThat(businessException.getErrorCode()).isEqualTo(BusinessErrorCode.NOT_FOUND_ORDER_PRODUCT),
+                        () -> assertThat(businessException.getMessage()).isEqualTo("주문 상품을 찾을 수 없습니다.")
+                    );
                 });
         }
     }
@@ -307,7 +313,9 @@ class OrderRepositoryTest {
                 .isInstanceOf(BusinessException.class)
                 .satisfies(exception -> {
                     BusinessException businessException = (BusinessException) exception;
-                    assertThat(businessException.getErrorCode()).isEqualTo(BusinessErrorCode.ALREADY_CANCELED_ORDER_PRODUCT);
+                    assertAll(
+                        () -> assertThat(businessException.getErrorCode()).isEqualTo(BusinessErrorCode.ALREADY_CANCELED_ORDER_PRODUCT)
+                    );
                 });
         }
 
@@ -427,7 +435,9 @@ class OrderRepositoryTest {
             )).isInstanceOf(BusinessException.class)
               .satisfies(exception -> {
                   BusinessException businessException = (BusinessException) exception;
-                  assertThat(businessException.getErrorCode()).isEqualTo(BusinessErrorCode.ORDER_PRICE_CANNOT_BE_NEGATIVE);
+                  assertAll(
+                      () -> assertThat(businessException.getErrorCode()).isEqualTo(BusinessErrorCode.ORDER_PRICE_CANNOT_BE_NEGATIVE)
+                  );
               });
         }
     }

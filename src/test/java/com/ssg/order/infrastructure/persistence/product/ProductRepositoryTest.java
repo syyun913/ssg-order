@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.ssg.order.domain.common.annotation.exception.BusinessException;
 import com.ssg.order.domain.common.annotation.exception.code.BusinessErrorCode;
@@ -24,6 +25,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+@DisplayName("상품 레포지토리 테스트")
 @ExtendWith(MockitoExtension.class)
 class ProductRepositoryTest {
 
@@ -155,8 +157,10 @@ class ProductRepositoryTest {
                     .isInstanceOf(BusinessException.class)
                     .satisfies(exception -> {
                         BusinessException businessException = (BusinessException) exception;
-                        assertThat(businessException.getErrorCode()).isEqualTo(BusinessErrorCode.NOT_FOUND_PRODUCT);
-                        assertThat(businessException.getMessage()).isEqualTo("상품을 조회할 수 없습니다.");
+                        assertAll(
+                            () -> assertThat(businessException.getErrorCode()).isEqualTo(BusinessErrorCode.NOT_FOUND_PRODUCT),
+                            () -> assertThat(businessException.getMessage()).isEqualTo("상품을 조회할 수 없습니다.")
+                        );
                     });
         }
     }

@@ -1,8 +1,10 @@
 package com.ssg.order.infrastructure.persistence.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -22,6 +24,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+@DisplayName("사용자 레포지토리 테스트")
 @ExtendWith(MockitoExtension.class)
 class UserRepositoryTest {
 
@@ -75,14 +78,17 @@ class UserRepositoryTest {
             // given
             when(userJpaRepository.findByUserName("nonExistentUser")).thenReturn(Optional.empty());
 
-            // when & then
-            assertThatThrownBy(() -> userRepository.getUserByUserName("nonExistentUser"))
-                .isInstanceOf(BusinessException.class)
-                .satisfies(exception -> {
-                    BusinessException businessException = (BusinessException) exception;
-                    assertThat(businessException.getErrorCode()).isEqualTo(BusinessErrorCode.NOT_FOUND_USER);
-                    assertThat(businessException.getMessage()).isEqualTo("사용자를 찾을 수 없습니다.");
-                });
+            // when
+            BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> userRepository.getUserByUserName("nonExistentUser")
+            );
+
+            // then
+            assertAll(
+                () -> assertEquals(BusinessErrorCode.NOT_FOUND_USER, exception.getErrorCode()),
+                () -> assertEquals("사용자를 찾을 수 없습니다.", exception.getMessage())
+            );
         }
     }
 

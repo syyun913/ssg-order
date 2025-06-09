@@ -24,6 +24,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+@DisplayName("락 수행 어드바이스 테스트")
 @ExtendWith(MockitoExtension.class)
 class ExecutionLockAdviceTest {
     @Mock

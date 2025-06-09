@@ -1,11 +1,13 @@
 package com.ssg.order.api.order.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.eq;
 
 import com.ssg.order.api.order.mapper.OrderDtoMapper;
 import com.ssg.order.api.order.service.request.CreateOrderProductRequest;
@@ -90,10 +92,17 @@ class OrderServiceTest {
 
             when(productUseCase.findProductsByProductIds(List.of(1L))).thenReturn(List.of());
 
-            // when & then
-            assertThatThrownBy(() -> orderService.createOrder(userId, request))
-                .isInstanceOf(BusinessException.class)
-                .hasFieldOrPropertyWithValue("errorCode", BusinessErrorCode.NOT_FOUND_PRODUCT);
+            // when
+            BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> orderService.createOrder(userId, request)
+            );
+
+            // then
+            assertAll(
+                () -> assertEquals(BusinessErrorCode.NOT_FOUND_PRODUCT, exception.getErrorCode()),
+                () -> assertEquals("상품을 조회할 수 없습니다.", exception.getMessage())
+            );
         }
 
         @Test
@@ -108,10 +117,17 @@ class OrderServiceTest {
 
             when(productUseCase.findProductsByProductIds(List.of(1L))).thenReturn(List.of(product));
 
-            // when & then
-            assertThatThrownBy(() -> orderService.createOrder(userId, request))
-                .isInstanceOf(BusinessException.class)
-                .hasFieldOrPropertyWithValue("errorCode", BusinessErrorCode.OUT_OF_STOCK);
+            // when
+            BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> orderService.createOrder(userId, request)
+            );
+
+            // then
+            assertAll(
+                () -> assertEquals(BusinessErrorCode.OUT_OF_STOCK, exception.getErrorCode()),
+                () -> assertEquals("상품 재고가 부족합니다.", exception.getMessage())
+            );
         }
 
         @Test
@@ -248,10 +264,17 @@ class OrderServiceTest {
             when(orderUseCase.getOrderWithOrderProducts(orderId, userId)).thenReturn(order);
             when(productUseCase.findProductsByProductIds(List.of(productId))).thenReturn(List.of());
 
-            // when & then
-            assertThatThrownBy(() -> orderService.getOrderWithOrderProducts(orderId, userId))
-                .isInstanceOf(BusinessException.class)
-                .hasFieldOrPropertyWithValue("errorCode", BusinessErrorCode.NOT_FOUND_PRODUCT);
+            // when
+            BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> orderService.getOrderWithOrderProducts(orderId, userId)
+            );
+
+            // then
+            assertAll(
+                () -> assertEquals(BusinessErrorCode.NOT_FOUND_PRODUCT, exception.getErrorCode()),
+                () -> assertEquals("상품을 조회할 수 없습니다.", exception.getMessage())
+            );
         }
     }
 
@@ -374,10 +397,17 @@ class OrderServiceTest {
             when(orderUseCase.cancelOrderProduct(orderId, orderProductId, userId))
                 .thenThrow(new BusinessException(BusinessErrorCode.NOT_FOUND_ORDER));
 
-            // when & then
-            assertThatThrownBy(() -> orderService.cancelOrderProduct(orderId, orderProductId, userId))
-                .isInstanceOf(BusinessException.class)
-                .hasFieldOrPropertyWithValue("errorCode", BusinessErrorCode.NOT_FOUND_ORDER);
+            // when
+            BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> orderService.cancelOrderProduct(orderId, orderProductId, userId)
+            );
+
+            // then
+            assertAll(
+                () -> assertEquals(BusinessErrorCode.NOT_FOUND_ORDER, exception.getErrorCode()),
+                () -> assertEquals("주문 정보를 조회할 수 없습니다.", exception.getMessage())
+            );
         }
 
         @Test
@@ -391,10 +421,17 @@ class OrderServiceTest {
             when(orderUseCase.cancelOrderProduct(orderId, orderProductId, userId))
                 .thenThrow(new BusinessException(BusinessErrorCode.NOT_FOUND_ORDER_PRODUCT));
 
-            // when & then
-            assertThatThrownBy(() -> orderService.cancelOrderProduct(orderId, orderProductId, userId))
-                .isInstanceOf(BusinessException.class)
-                .hasFieldOrPropertyWithValue("errorCode", BusinessErrorCode.NOT_FOUND_ORDER_PRODUCT);
+            // when
+            BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> orderService.cancelOrderProduct(orderId, orderProductId, userId)
+            );
+
+            // then
+            assertAll(
+                () -> assertEquals(BusinessErrorCode.NOT_FOUND_ORDER_PRODUCT, exception.getErrorCode()),
+                () -> assertEquals("주문 상품을 찾을 수 없습니다.", exception.getMessage())
+            );
         }
 
         @Test
@@ -408,10 +445,17 @@ class OrderServiceTest {
             when(orderUseCase.cancelOrderProduct(orderId, orderProductId, userId))
                 .thenThrow(new BusinessException(BusinessErrorCode.ALREADY_CANCELED_ORDER_PRODUCT));
 
-            // when & then
-            assertThatThrownBy(() -> orderService.cancelOrderProduct(orderId, orderProductId, userId))
-                .isInstanceOf(BusinessException.class)
-                .hasFieldOrPropertyWithValue("errorCode", BusinessErrorCode.ALREADY_CANCELED_ORDER_PRODUCT);
+            // when
+            BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> orderService.cancelOrderProduct(orderId, orderProductId, userId)
+            );
+
+            // then
+            assertAll(
+                () -> assertEquals(BusinessErrorCode.ALREADY_CANCELED_ORDER_PRODUCT, exception.getErrorCode()),
+                () -> assertEquals("이미 취소된 주문 상품입니다.", exception.getMessage())
+            );
         }
 
         @Test
